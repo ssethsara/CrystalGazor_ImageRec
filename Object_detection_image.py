@@ -164,29 +164,63 @@ def ClothDetectionAnalyse(image,gender):
     bestBBox=[]
     bestScores=[]
     bestClasses=[]
+    UpperOrLower=[]
    
     normBBoxes=np.squeeze(boxes)
     normScores=np.squeeze(scores)
     normClasses=np.squeeze(classes)
 
-   
+    isLowerBodyClothAdded=False
+    isUpperBodyClothAdded=False
     for index,className in enumerate(normClasses):
+        className=category_index[className]['name']
        #if score>=min_score_thresh:
-        if((gender=="Male") & (className not in category_Dic.Female_Cloths)&(className not in category_Dic.Attributes)):
-            bestResults.append(index)
-            bestBBox.append(normBBoxes[index])
-            bestScores.append(normScores[index])
-            bestClasses.append(normClasses[index])
-            break
-        elif(className not in category_Dic.Attributes):
-            bestResults.append(index)
-            bestBBox.append(normBBoxes[index])
-            bestScores.append(normScores[index])
-            bestClasses.append(normClasses[index])
-            break
-    
+        if((gender=='Male') & (className not in category_Dic.Female_Cloths)&(className not in category_Dic.Attributes)):
+                
+                if((className in category_Dic.UpperBody) & (isUpperBodyClothAdded==False)):
+                    UpperOrLower.append("Upperbody")
+                    bestResults.append(index)
+                    bestBBox.append(normBBoxes[index])
+                    bestScores.append(normScores[index])
+                    bestClasses.append(normClasses[index])
+                    print("isUpper male")
+                    isUpperBodyClothAdded=True;
+                elif((className in category_Dic.LowerBody) & (isLowerBodyClothAdded==False)):
+                    UpperOrLower.append("LowerBody")
+                    bestResults.append(index)
+                    bestBBox.append(normBBoxes[index])
+                    bestScores.append(normScores[index])
+                    bestClasses.append(normClasses[index])
+                    isLowerBodyClothAdded=True;
+                    print("isLower male")
+                if((isLowerBodyClothAdded==True) & (isUpperBodyClothAdded==True)):
+                    print("Break")
+                    break
+        elif((gender=='Female') & (className not in category_Dic.Attributes)): 
+                if((className in category_Dic.UpperBody) & (isUpperBodyClothAdded==False)):
+                    UpperOrLower.append("Upperbody")
+                    bestResults.append(index)
+                    bestBBox.append(normBBoxes[index])
+                    bestScores.append(normScores[index])
+                    bestClasses.append(normClasses[index])
+                    print("isUpper Female")
+                    isUpperBodyClothAdded=True;
+                elif((className in category_Dic.LowerBody) & (isLowerBodyClothAdded==False)):
+                    UpperOrLower.append("LowerBody")
+                    bestResults.append(index)
+                    bestBBox.append(normBBoxes[index])
+                    bestScores.append(normScores[index])
+                    bestClasses.append(normClasses[index])
+                    isLowerBodyClothAdded=True;
+                    print("isLower Female")
+                if((isLowerBodyClothAdded==True) & (isUpperBodyClothAdded==True)):
+                    print("Break")
+                    break
+    className=category_index[normClasses[index]]['name']
+    print(className)                
 
     for index,score in enumerate(normScores):
+      
        if ((score>=min_score_thresh) &(className in category_Dic.Attributes)):
             bestResults.append(index)
             bestBBox.append(normBBoxes[index])
@@ -199,6 +233,7 @@ def ClothDetectionAnalyse(image,gender):
     crop_image_Data = pd.DataFrame()
     
     for index,bbox in enumerate(bestBBox):
+        
         crop_img=cropDetectedCloths(image,bbox)
         dominet_colors=color_Detector.dominant_color_detector(crop_img,3)
         colors=[]
@@ -216,15 +251,16 @@ def ClothDetectionAnalyse(image,gender):
         else:     
             clothType,clothStyle=className.split("_")
 
-        print(className)
+        
 
-
+        
         crop_image_Data=crop_image_Data.append(pd.DataFrame(
             {'image' : imageName,
-            'type' : clothType,
-            'style' : clothStyle,
-            'scores' : bestScores[index],
-            'dominant_colors': [colors]}))
+             'type' : clothType,
+             'Upper/Lower' : UpperOrLower[index],
+             'style' : clothStyle,
+             'scores' : bestScores[index],
+             'dominant_colors': [colors]}))
         
     with pd.option_context('display.max_rows', None, 'display.max_columns', None):
         print(crop_image_Data)
@@ -253,7 +289,7 @@ def ClothDetectionAnalyse(image,gender):
 
 #new update
 
-photoNumber=9
+photoNumber=16
 min_score_thresh=0.75    
     
 userId=1
@@ -269,7 +305,7 @@ print("Username :",userName)
 print("imageName :",imageName)
 imagePath='FacebookData/'+userName+'/photos/'
 image = cv2.imread(join(imagePath,imageName))
-
+cv2.imshow('image', image)
 
 
 print(tagData)
@@ -277,6 +313,6 @@ print(tagData)
 tagged_image=photo_preprocess.CropTaggedPerson(image,tagData)
 
 
-tagged_image = cv2.resize(tagged_image, (0,0), fx=0.5, fy=0.5)
+#tagged_image = cv2.resize(tagged_image, (0,0), fx=0.5, fy=0.5)
 #image = cv2.imread(PATH_TO_IMAGE)
 ClothDetectionAnalyse(tagged_image,gender)
