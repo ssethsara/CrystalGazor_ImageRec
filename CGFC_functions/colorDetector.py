@@ -98,7 +98,7 @@ def dominant_color_detector(image,amount):
     image = cv2.resize(image, (0,0), fx=0.1, fy=0.1) 
     h,w,bpp = np.shape(image)
 
-    for py in range(0,h):
+    """  for py in range(0,h):
         for px in range(0,w):
             input_color = (image[py][px][0],image[py][px][1],image[py][px][2])
             tree = sp.KDTree(websafe_colors) # creating k-d tree from web-save colors
@@ -108,7 +108,7 @@ def dominant_color_detector(image,amount):
             image[py][px][0]=nearest_color[0]
             image[py][px][1]=nearest_color[1]
             image[py][px][2]=nearest_color[2]
-
+    """
     #cv2.imshow('matrix', image)
 
     # reshape the image to be a list of pixels
@@ -135,9 +135,9 @@ def dominant_color_detector(image,amount):
         tree = sp.KDTree(websafe_colors) # creating k-d tree from web-save colors
         ditsance, result = tree.query(input_color) # get Euclidean distance and index of web-save color in tree/list
         nearest_color = websafe_colors[result]
-        actual_name, closest_name = get_colour_name((nearest_color[0],nearest_color[1],nearest_color[2]))
+        #actual_name, closest_name = get_colour_name((nearest_color[0],nearest_color[1],nearest_color[2]))
         
-        #actual_name, closest_name = get_colour_name((colorCode[0],colorCode[1],colorCode[2]))
+        actual_name, closest_name = get_colour_name((colorCode[0],colorCode[1],colorCode[2]))
         #print("Actual colour name:", actual_name, ", closest colour name:", closest_name) 
 
         color_data=[colorCode,'%.2f'%(percent*100),actual_name,closest_name]

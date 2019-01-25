@@ -13,13 +13,15 @@ from os.path import isfile, join
 def CropTaggedPerson(image,tagDf):
 
     height, width, channels = image.shape 
-    print(height,width)
+  
     
     #extract tag position data
     Tag_width=float(tagDf["Tag_width"])
     Tag_height=float(tagDf["Tag_height"])
     Tag_left=float(tagDf["Tag_left"])
     Tag_top=float(tagDf["Tag_top"])
+
+    
 
     #convert to x,y axis
     heightPixel=(height*Tag_height/100)
@@ -36,6 +38,14 @@ def CropTaggedPerson(image,tagDf):
     x1_body=int(x1_head-widthPixel*0.75)
     y2_body=int(y1_head+((height*Tag_height/100))*7.5)
     x2_body=int(x1_head+((width*Tag_width/100))*1.75)
+
+    if(x1_body<0):
+        x1_body=0
+    if(y2_body>height):
+        y2_body=height
+    if(x2_body>width):
+        x2_body=width
+           
 
     cv2.rectangle(image, (x1_body, y1_body), (x2_body, y2_body), (0,255,0), 2)
     #cv2.rectangle(image, (x1_head, y1_head), (x2_head, y2_head), (255,0,0), 1)

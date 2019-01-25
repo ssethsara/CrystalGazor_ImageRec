@@ -115,9 +115,14 @@ def cropDetectedCloths(image,bbox):
     ymax = bbox[2]
     xmax = bbox[3]
 
+ 
+
     (im_height,im_width,im_color) = image.shape
     (xminn, xmaxx, yminn, ymaxx) = (xmin * im_width, xmax * im_width, ymin * im_height, ymax * im_height)
-    crop_img = image[int(yminn):int(ymaxx), int(xminn):int(xmaxx)]
+
+    bboxWidth=xmaxx-xminn
+    bboxHeight=ymaxx-yminn
+    crop_img = image[int(yminn+(bboxHeight*2/10)):int(ymaxx-(bboxHeight*2/10)), int(xminn+(bboxWidth*2/10)):int(xmaxx-(bboxWidth*2/10))]
     cv2.imshow("cropped", crop_img)
 
     return crop_img
@@ -151,7 +156,7 @@ def colorRecognition(image,bbox):
 
 
 
-def ClothDetectionAnalyse(image,gender):
+def ClothDetectionAnalyse(image,tagData,gender):
 
     detectedData=Detect_Cloths(image)
 
@@ -183,7 +188,7 @@ def ClothDetectionAnalyse(image,gender):
                     bestBBox.append(normBBoxes[index])
                     bestScores.append(normScores[index])
                     bestClasses.append(normClasses[index])
-                    print("isUpper male")
+                    print("isUpper male:",className)
                     isUpperBodyClothAdded=True;
                 elif((className in category_Dic.LowerBody) & (isLowerBodyClothAdded==False)):
                     UpperOrLower.append("LowerBody")
@@ -192,9 +197,8 @@ def ClothDetectionAnalyse(image,gender):
                     bestScores.append(normScores[index])
                     bestClasses.append(normClasses[index])
                     isLowerBodyClothAdded=True;
-                    print("isLower male")
+                    print("isLower male:",className)
                 if((isLowerBodyClothAdded==True) & (isUpperBodyClothAdded==True)):
-                    print("Break")
                     break
         elif((gender=='Female') & (className not in category_Dic.Attributes)): 
                 if((className in category_Dic.UpperBody) & (isUpperBodyClothAdded==False)):
@@ -203,7 +207,7 @@ def ClothDetectionAnalyse(image,gender):
                     bestBBox.append(normBBoxes[index])
                     bestScores.append(normScores[index])
                     bestClasses.append(normClasses[index])
-                    print("isUpper Female")
+                    print("isUpper Female :",className)
                     isUpperBodyClothAdded=True;
                 elif((className in category_Dic.LowerBody) & (isLowerBodyClothAdded==False)):
                     UpperOrLower.append("LowerBody")
@@ -212,9 +216,8 @@ def ClothDetectionAnalyse(image,gender):
                     bestScores.append(normScores[index])
                     bestClasses.append(normClasses[index])
                     isLowerBodyClothAdded=True;
-                    print("isLower Female")
+                    print("isLower Female:",className)
                 if((isLowerBodyClothAdded==True) & (isUpperBodyClothAdded==True)):
-                    print("Break")
                     break
     className=category_index[normClasses[index]]['name']
     print(className)                
@@ -252,7 +255,8 @@ def ClothDetectionAnalyse(image,gender):
             clothType,clothStyle=className.split("_")
 
         
-
+        uploadedDate=str(tagData["UploadedDate"])
+        photoID=tagData["PhotoID"]
         
         crop_image_Data=crop_image_Data.append(pd.DataFrame(
             {'image' : imageName,
@@ -260,10 +264,12 @@ def ClothDetectionAnalyse(image,gender):
              'Upper/Lower' : UpperOrLower[index],
              'style' : clothStyle,
              'scores' : bestScores[index],
-             'dominant_colors': [colors]}))
+             'dominant_colors': [colors],
+             'UploadedDate':str(tagData["UploadedDate"]),
+             'PhotoID':photoID}),ignore_index=True)
+             
         
-    with pd.option_context('display.max_rows', None, 'display.max_columns', None):
-        print(crop_image_Data)
+ 
      
 
     # Draw the results of the detection (aka 'visulaize the results')
@@ -280,39 +286,89 @@ def ClothDetectionAnalyse(image,gender):
     # All the results have been drawn on image. Now display the image.
     cv2.imshow('Object detector', detectedData['image'][0])
 
-    # Press any key to close the image
-    cv2.waitKey(0)
-
-    # Clean up
-    cv2.destroyAllWindows()
+  
+    return crop_image_Data
 
 
 #new update
 
-photoNumber=16
+ExtractedData=pd.DataFrame()
+
+photoNumber=12
 min_score_thresh=0.75    
     
 userId=1
 usersData,photoData=fbData.GetPhotoDataById(userId)
+print(len(photoData))
+
+"""
+#test
 
 selectedPhotoData=photoData.iloc[photoNumber]
+print(selectedPhotoData)
 tagData=selectedPhotoData[['PhotoID','Tag_width','Tag_height','Tag_left','Tag_top']]
 userName=usersData['Name'][0]
 gender=usersData['Gender'][0]
 imageName=selectedPhotoData['PhotoName']
+photoID=selectedPhotoData['PhotoID']
 
+print("PhotoID :",photoID)
 print("Username :",userName)
 print("imageName :",imageName)
+   
 imagePath='FacebookData/'+userName+'/photos/'
 image = cv2.imread(join(imagePath,imageName))
-cv2.imshow('image', image)
 
-
-print(tagData)
 
 tagged_image=photo_preprocess.CropTaggedPerson(image,tagData)
 
 
-#tagged_image = cv2.resize(tagged_image, (0,0), fx=0.5, fy=0.5)
-#image = cv2.imread(PATH_TO_IMAGE)
-ClothDetectionAnalyse(tagged_image,gender)
+    #tagged_image = cv2.resize(tagged_image, (0,0), fx=0.5, fy=0.5)
+    #image = cv2.imread(PATH_TO_IMAGE)
+
+onePhotoData=ClothDetectionAnalyse(tagged_image,gender)
+
+    #ExtractedData=ExtractedData.append(onePhotoData)
+#test-----
+"""
+
+
+
+for index, selectedPhotoData in photoData.iterrows():
+    tagData=selectedPhotoData[['PhotoID','PhotoName','UploadedDate','Tag_width','Tag_height','Tag_left','Tag_top']]
+    userName=usersData['Name'][0]
+    gender=usersData['Gender'][0]
+    imageName=selectedPhotoData['PhotoName']
+    photoID=selectedPhotoData['PhotoID']
+
+    print("PhotoID :",photoID)
+    print("Username :",userName)
+    print("imageName :",imageName)
+   
+    imagePath='FacebookData/'+userName+'/photos/'
+    image = cv2.imread(join(imagePath,imageName))
+
+
+    tagged_image=photo_preprocess.CropTaggedPerson(image,tagData)
+
+
+    #tagged_image = cv2.resize(tagged_image, (0,0), fx=0.5, fy=0.5)
+    #image = cv2.imread(PATH_TO_IMAGE)
+
+    onePhotoData=ClothDetectionAnalyse(tagged_image,tagData,gender)
+
+    ExtractedData=ExtractedData.append(onePhotoData)
+   
+
+ExtractedData.reset_index(inplace = True)
+with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+    print(ExtractedData)
+
+
+# Press any key to close the image
+cv2.waitKey(0)
+
+# Clean up
+cv2.destroyAllWindows()
+
+
