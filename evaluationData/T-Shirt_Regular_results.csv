@@ -1,0 +1,12 @@
+filename,9.jpg
+width,600
+height,515
+class,T-Shirt_Regular
+xmin,85
+ymin,139
+xmax,509
+ymax,515
+DetectedClass,T-Shirt_Regular
+Confidence,0.99850464
+Detected,True
+loc_Accuracy,0.9278900420265533

@@ -1,3 +1,9 @@
+import pandas as pd
+import numpy as np
+import os
+
+
+
 def get_iou(bb1, bb2):
     """
     Calculate the Intersection over Union (IoU) of two bounding boxes.
@@ -43,7 +49,43 @@ def get_iou(bb1, bb2):
     # compute the intersection over union by taking the intersection
     # area and dividing it by the sum of prediction + ground-truth
     # areas - the interesection area
-    iou = intersection_area / float(bb1_area + bb2_area - intersection_area)
+    iou=0.0
+    iou = iou+(intersection_area / float(bb1_area + bb2_area - intersection_area))
     assert iou >= 0.0
     assert iou <= 1.0
     return iou
+
+
+def getTPCount(evalData,min_IoU):
+    evalData= evalData.loc[(evalData['loc_Accuracy'] >= min_IoU)]
+    return len(evalData)
+
+def getFPCount(evalData):
+    evalData=evalData.loc[(evalData['DetectedClass'] != evalData['class']) &(evalData['DetectedClass'] !='UnDetected')]
+    return len(evalData)
+
+def getFNCount(evalData):
+    evalData=evalData.loc[evalData['DetectedClass'] =='UnDetected']
+    return len(evalData)  
+
+def getPrecision(evalData):
+    tp=getTPCount(evalData,0.75)
+    fp=getFPCount(evalData)
+    fn=getFNCount(evalData)
+    return tp/(tp+fp)
+
+def getRecall(evalData):
+    tp=getTPCount(evalData,0.75)
+    fp=getFPCount(evalData)
+    fn=getFNCount(evalData)
+    return tp/(tp+fn)
+
+
+
+def test():
+    os.chdir("..")
+    evalResults = pd.read_csv('evaluationData/Evaluation_results.csv')
+    print('Precision: ',getPrecision(evalResults))
+    print('Recall: ',getRecall(evalResults))
+
+test()

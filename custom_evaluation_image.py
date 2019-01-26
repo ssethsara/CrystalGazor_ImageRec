@@ -24,6 +24,8 @@ import sys
 import pandas as pd
 from os.path import join
 
+
+
 #color detection 1
 #import__color recognition
 from sklearn.cluster import KMeans
@@ -38,7 +40,8 @@ from utils import label_map_util
 from utils import visualization_utils as vis_util
 from CGFC_functions import colorDetector as color_Detector
 from CGFC_functions import PhotoPreprocessing as photo_preprocess
-from CGFC_functions import category_Dic 
+from CGFC_functions import category_Dic
+from CGFC_functions import evaluation
 from evaluationData import getEvalData 
 
 
@@ -143,15 +146,28 @@ def Detect_Cloths(image):
     #print(output['scores'][0])
     
     return output 
+
+
   
 
 def colorRecognition(image,bbox):
     #color-Recognition 1
         dominet_colors=color_Detector.dominant_color_detector(crop_img,3)
 
+min_score_thresh=0.75
 
+def EvaluateObjectDetection(image,data):
 
-def ClothDetectionAnalyse(image,gender):
+    trueClass=data["class"]
+    trueXmin=data["xmin"]
+    trueXmax=data["xmax"]
+    trueYmin=data["ymin"]
+    trueYmax=data["ymax"]
+    
+    originalBB={'x1' : trueXmin,
+                 'x2' : trueXmax,
+                 'y1' : trueYmin,
+                 'y2' : trueYmax }
 
     detectedData=Detect_Cloths(image)
 
@@ -160,68 +176,52 @@ def ClothDetectionAnalyse(image,gender):
     classes=detectedData['classes'][0]
 
 
-    bestResults=[]
-    bestBBox=[]
-    bestScores=[]
-    bestClasses=[]
    
     normBBoxes=np.squeeze(boxes)
     normScores=np.squeeze(scores)
     normClasses=np.squeeze(classes)
 
-   
+    iou=0.0
+    detected=False
+
+    if normScores[0]>min_score_thresh:
+            data['DetectedClass']=category_index[normClasses[0]]['name']
+            data['Confidence'] = normScores[0]
+
     for index,className in enumerate(normClasses):
-       #if score>=min_score_thresh:
-        if((gender=="Male") & (className not in category_Dic.Female_Cloths)&(className not in category_Dic.Attributes)):
-            bestResults.append(index)
-            bestBBox.append(normBBoxes[index])
-            bestScores.append(normScores[index])
-            bestClasses.append(normClasses[index])
+        className=category_index[className]['name']
+        if(normScores[index]<min_score_thresh):
+            data['Detected'] = False
             break
-        elif(className not in category_Dic.Attributes):
-            bestResults.append(index)
-            bestBBox.append(normBBoxes[index])
-            bestScores.append(normScores[index])
-            bestClasses.append(normClasses[index])
+        if className==trueClass:
+            detected=True
+            print(className+':'+str(normScores[index]))
+            bbox=normBBoxes[index]
+            ymin = bbox[0]
+            xmin = bbox[1]
+            ymax = bbox[2]
+            xmax = bbox[3]
+            (im_height,im_width,im_color) = image.shape
+            (xminn, xmaxx, yminn, ymaxx) = (xmin * im_width, xmax * im_width, ymin * im_height, ymax * im_height)
+            cv2.rectangle(image, (int(trueXmin), int(trueYmin)), (int(trueXmax), int(trueYmax)), (0,255,0), 2)
+    
+            detectedBB={'x1' : xminn,
+                         'x2' : xmaxx,
+                         'y1' : yminn,
+                         'y2' : ymaxx }
+        
+            iou=evaluation.get_iou(originalBB, detectedBB) 
+            print(iou)
+            data['DetectedClass']=className
+            data['Detected'] = True
+            data['Confidence'] = normScores[index]
+            data['loc_Accuracy'] = iou
             break
-    
-
-    for index,score in enumerate(normScores):
-       if ((score>=min_score_thresh) &(className in category_Dic.Attributes)):
-            bestResults.append(index)
-            bestBBox.append(normBBoxes[index])
-            bestScores.append(score)
-            bestClasses.append(normClasses[index])
-         
-    
-
-  
-    crop_image_Data = pd.DataFrame()
-    
-    for index,bbox in enumerate(bestBBox):
-        crop_img=cropDetectedCloths(image,bbox)
-        dominet_colors=color_Detector.dominant_color_detector(crop_img,3)
-        colors=[]
-        for color in dominet_colors:
-            colors.append([color[1],color[3]])
-
-        className=category_index[bestClasses[index]]['name']
-        clothType=None
-        clothStyle=None
-
-  
-        if (className in category_Dic.Attributes):
-            clothType=className
-            clothStyle=None
-        else:     
-            clothType,clothStyle=className.split("_")
-
-        print(className)
-
-
+        
+        
+            
        
-
-    # Draw the results of the detection (aka 'visulaize the results')
+     # Draw the results of the detection (aka 'visulaize the results')
     vis_util.visualize_boxes_and_labels_on_image_array(
             detectedData['image'][0],
             np.squeeze(boxes),
@@ -233,41 +233,64 @@ def ClothDetectionAnalyse(image,gender):
             min_score_thresh=min_score_thresh)
 
     # All the results have been drawn on image. Now display the image.
-    cv2.imshow('Object detector', detectedData['image'][0])
+   # cv2.imshow('Object detector', detectedData['image'][0])
+   
 
+    return data
+       
+
+    
+
+
+def main():
+    completeEvaluationData=pd.DataFrame()
+    evaluationData=pd.DataFrame()
+
+
+    for className in ['T-Shirt_Regular']:
+        testDataSet=getEvalData.GetObjectByClass(className)
+
+        for selectedPhotoData in testDataSet.iterrows():
+            #selectedPhotoData=testDataSet.iloc[photoNumber]
+            selectedPhotoData=selectedPhotoData[1]
+            imageName=selectedPhotoData['filename']
+
+            print("imageName :",imageName)
+            imagePath='evaluationData/'+className
+            image = cv2.imread(join(imagePath,imageName))
+            #tagged_image = cv2.resize(image,(0,0), fx=0.5, fy=0.5)
+            result=EvaluateObjectDetection(image,selectedPhotoData)
+            evaluationData=evaluationData.append(result)
+
+        evaluationData['Detected'] = evaluationData['Detected'].astype('bool')
+        evaluationData.loc_Accuracy = evaluationData.loc_Accuracy.astype(float)   
+        evaluationData['loc_Accuracy'].fillna(0, inplace=True)
+        evaluationData['Confidence'].fillna(0, inplace=True)
+        evaluationData['DetectedClass'].fillna('UnDetected', inplace=True)
+         
+            
+    fileName='evaluationData/Evaluation_results.csv'
+    completeEvaluationData=completeEvaluationData.append(evaluationData)
+    with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+        print(completeEvaluationData)
+
+    if os.path.isfile(fileName):
+        try:
+            os.remove(os.path.join('evaluationData/', 'Evaluation_results.csv'))
+            # save new pic after this 
+            completeEvaluationData.to_csv(fileName)
+            print(fileName+'file Replaced')
+        except:
+            print('error:'+fileName+'File replace failed')
+    else:
+        completeEvaluationData.to_csv(fileName) 
+
+       
+    
     # Press any key to close the image
-    cv2.waitKey(0)
+    #cv2.waitKey(0)
 
     # Clean up
-    cv2.destroyAllWindows()
+    #cv2.destroyAllWindows()
 
-
-#new update
-photoNumber=0
-
-min_score_thresh=0.75    
-className='T-Shirt_Regular'    
-testDataSet=getEvalData.GetObjectByClass(className)
-
-selectedPhotoData=testDataSet.iloc[photoNumber]
-print(selectedPhotoData)
-imageName=selectedPhotoData['filename']
-
-print("imageName :",imageName)
-imagePath='evaluationData/'+className
-image = cv2.imread(join(imagePath,imageName))
-
-
-
-tagged_image = cv2.resize(image,(0,0), fx=0.5, fy=0.5)
-
-output=Detect_Cloths(image)
-print(output)
-
-cv2.imshow('test', image)
-
-# Press any key to close the image
-cv2.waitKey(0)
-
-# Clean up
-cv2.destroyAllWindows()
+main()    

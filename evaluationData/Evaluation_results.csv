@@ -1,0 +1,11 @@
+,Confidence,Detected,DetectedClass,class,filename,height,loc_Accuracy,width,xmax,xmin,ymax,ymin
+0,0.9700876474380493,True,T-Shirt_Regular,T-Shirt_Regular,1.jpg,276.0,0.8644006528571301,183.0,172.0,14.0,236.0,64.0
+1,0.8992670774459839,False,Shirt_Polo,T-Shirt_Regular,10.jpg,300.0,0.0,168.0,167.0,5.0,300.0,130.0
+2,0.9110813736915588,False,Shirt_Polo,T-Shirt_Regular,2.jpg,183.0,0.0,276.0,271.0,62.0,183.0,1.0
+3,0.9967983365058899,True,T-Shirt_Regular,T-Shirt_Regular,3.jpg,183.0,0.9388858788141992,275.0,242.0,125.0,182.0,67.0
+4,0.9978281855583191,True,T-Shirt_Regular,T-Shirt_Regular,4.jpg,275.0,0.8747512911912722,183.0,183.0,6.0,273.0,81.0
+5,0.0,False,UnDetected,T-Shirt_Regular,5.jpg,275.0,0.0,183.0,151.0,70.0,154.0,47.0
+6,0.9970302581787109,True,T-Shirt_Regular,T-Shirt_Regular,6.jpg,183.0,0.8942605102909534,275.0,229.0,95.0,182.0,84.0
+7,0.0,False,UnDetected,T-Shirt_Regular,7.jpg,183.0,0.0,275.0,120.0,47.0,156.0,39.0
+8,0.9834322333335876,True,T-Shirt_Regular,T-Shirt_Regular,8.jpg,275.0,0.926797139112749,183.0,164.0,33.0,249.0,80.0
+9,0.998504638671875,True,T-Shirt_Regular,T-Shirt_Regular,9.jpg,515.0,0.9278900420265533,600.0,509.0,85.0,515.0,139.0

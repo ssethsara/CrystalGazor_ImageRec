@@ -1,0 +1,26 @@
+<annotation verified="yes">
+	<folder>T-Shirt</folder>
+	<filename>10.jpg</filename>
+	<path>D:\4th year project\evaluationData\T-Shirt\10.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>168</width>
+		<height>300</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>T-Shirt_Regular</name>
+		<pose>Unspecified</pose>
+		<truncated>1</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>5</xmin>
+			<ymin>130</ymin>
+			<xmax>167</xmax>
+			<ymax>300</ymax>
+		</bndbox>
+	</object>
+</annotation>
