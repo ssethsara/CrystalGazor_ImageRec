@@ -154,9 +154,9 @@ def colorRecognition(image,bbox):
     #color-Recognition 1
         dominet_colors=color_Detector.dominant_color_detector(crop_img,3)
 
-min_score_thresh=0.75
 
-def EvaluateObjectDetection(image,data):
+
+def EvaluateObjectDetection(image,data,min_tresh_values):
 
     trueClass=data["class"]
     trueXmin=data["xmin"]
@@ -174,51 +174,52 @@ def EvaluateObjectDetection(image,data):
     boxes=detectedData['boxes'][0]
     scores=detectedData['scores'][0]
     classes=detectedData['classes'][0]
-
-
+    result=pd.DataFrame()
+    for min_score_thresh in min_tresh_values:
    
-    normBBoxes=np.squeeze(boxes)
-    normScores=np.squeeze(scores)
-    normClasses=np.squeeze(classes)
+        normBBoxes=np.squeeze(boxes)
+        normScores=np.squeeze(scores)
+        normClasses=np.squeeze(classes)
 
-    iou=0.0
-    detected=False
+        iou=0.0
+        detected=False
+        data['DetectedClass'] = 'UnDetected'
+        if normScores[0]>min_score_thresh:
+                data['DetectedClass']=category_index[normClasses[0]]['name']
+                data['Confidence'] = normScores[0]
 
-    if normScores[0]>min_score_thresh:
-            data['DetectedClass']=category_index[normClasses[0]]['name']
-            data['Confidence'] = normScores[0]
-
-    for index,className in enumerate(normClasses):
-        className=category_index[className]['name']
-        if(normScores[index]<min_score_thresh):
-            data['Detected'] = False
-            break
-        if className==trueClass:
-            detected=True
-            print(className+':'+str(normScores[index]))
-            bbox=normBBoxes[index]
-            ymin = bbox[0]
-            xmin = bbox[1]
-            ymax = bbox[2]
-            xmax = bbox[3]
-            (im_height,im_width,im_color) = image.shape
-            (xminn, xmaxx, yminn, ymaxx) = (xmin * im_width, xmax * im_width, ymin * im_height, ymax * im_height)
-            cv2.rectangle(image, (int(trueXmin), int(trueYmin)), (int(trueXmax), int(trueYmax)), (0,255,0), 2)
-    
-            detectedBB={'x1' : xminn,
-                         'x2' : xmaxx,
-                         'y1' : yminn,
-                         'y2' : ymaxx }
+        for index,className in enumerate(normClasses):
+            className=category_index[className]['name']
+            if(normScores[index]<min_score_thresh):
+                data['Detected'] = False
+                break
+            if className==trueClass:
+                detected=True
+                print(className+':'+str(normScores[index]))
+                bbox=normBBoxes[index]
+                ymin = bbox[0]
+                xmin = bbox[1]
+                ymax = bbox[2]
+                xmax = bbox[3]
+                (im_height,im_width,im_color) = image.shape
+                (xminn, xmaxx, yminn, ymaxx) = (xmin * im_width, xmax * im_width, ymin * im_height, ymax * im_height)
+                cv2.rectangle(image, (int(trueXmin), int(trueYmin)), (int(trueXmax), int(trueYmax)), (0,255,0), 2)
         
-            iou=evaluation.get_iou(originalBB, detectedBB) 
-            print(iou)
-            data['DetectedClass']=className
-            data['Detected'] = True
-            data['Confidence'] = normScores[index]
-            data['loc_Accuracy'] = iou
-            break
-        
-        
+                detectedBB={'x1' : xminn,
+                             'x2' : xmaxx,
+                             'y1' : yminn,
+                             'y2' : ymaxx }
+            
+                iou=evaluation.get_iou(originalBB, detectedBB) 
+                print(iou)
+                data['DetectedClass']=className
+                data['Detected'] = True
+                data['Confidence'] = normScores[index]
+                data['loc_Accuracy'] = iou
+                break
+            
+        data['min_tresh']=min_score_thresh
+        result=result.append(data)   
             
        
      # Draw the results of the detection (aka 'visulaize the results')
@@ -236,7 +237,7 @@ def EvaluateObjectDetection(image,data):
    # cv2.imshow('Object detector', detectedData['image'][0])
    
 
-    return data
+    return result
        
 
     
@@ -245,7 +246,7 @@ def EvaluateObjectDetection(image,data):
 def main():
     completeEvaluationData=pd.DataFrame()
     evaluationData=pd.DataFrame()
-
+    min_tresh_values=[0.2,0.4,0.6,0.8]
 
     for className in ['T-Shirt_Regular']:
         testDataSet=getEvalData.GetObjectByClass(className)
@@ -259,7 +260,7 @@ def main():
             imagePath='evaluationData/'+className
             image = cv2.imread(join(imagePath,imageName))
             #tagged_image = cv2.resize(image,(0,0), fx=0.5, fy=0.5)
-            result=EvaluateObjectDetection(image,selectedPhotoData)
+            result=EvaluateObjectDetection(image,selectedPhotoData,min_tresh_values)
             evaluationData=evaluationData.append(result)
 
         evaluationData['Detected'] = evaluationData['Detected'].astype('bool')
@@ -268,12 +269,11 @@ def main():
         evaluationData['Confidence'].fillna(0, inplace=True)
         evaluationData['DetectedClass'].fillna('UnDetected', inplace=True)
          
-            
+       
+        
     fileName='evaluationData/Evaluation_results.csv'
     completeEvaluationData=completeEvaluationData.append(evaluationData)
-    with pd.option_context('display.max_rows', None, 'display.max_columns', None):
-        print(completeEvaluationData)
-
+ 
     if os.path.isfile(fileName):
         try:
             os.remove(os.path.join('evaluationData/', 'Evaluation_results.csv'))
@@ -285,7 +285,7 @@ def main():
     else:
         completeEvaluationData.to_csv(fileName) 
 
-       
+    evaluation.evaluate(evaluationData)   
     
     # Press any key to close the image
     #cv2.waitKey(0)

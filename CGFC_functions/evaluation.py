@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
 import os
-
-
+import matplotlib.pyplot as plt
+from sklearn.utils.fixes import signature
 
 def get_iou(bb1, bb2):
     """
@@ -57,7 +57,7 @@ def get_iou(bb1, bb2):
 
 
 def getTPCount(evalData,min_IoU):
-    evalData= evalData.loc[(evalData['loc_Accuracy'] >= min_IoU)]
+    evalData= evalData.loc[(evalData['loc_Accuracy'] >= min_IoU)&(evalData['DetectedClass'] == evalData['class'])]
     return len(evalData)
 
 def getFPCount(evalData):
@@ -68,24 +68,74 @@ def getFNCount(evalData):
     evalData=evalData.loc[evalData['DetectedClass'] =='UnDetected']
     return len(evalData)  
 
-def getPrecision(evalData):
-    tp=getTPCount(evalData,0.75)
-    fp=getFPCount(evalData)
-    fn=getFNCount(evalData)
+def getPrecision(tp,fp):
     return tp/(tp+fp)
 
-def getRecall(evalData):
-    tp=getTPCount(evalData,0.75)
-    fp=getFPCount(evalData)
-    fn=getFNCount(evalData)
+def getRecall(tp,fn):
     return tp/(tp+fn)
 
+def ListOnTreshold(evalResults,min_IoU,min_tresh_values):
+    print(evalResults)
+    resultsPR=pd.DataFrame()
+    for min_tresh in min_tresh_values:
+        print(min_tresh)
+        evalResultsFiltered=evalResults.loc[evalResults['min_tresh']==min_tresh]
+        tp=getTPCount(evalResultsFiltered,min_IoU)
+        fp=getFPCount(evalResultsFiltered)
+        fn=getFNCount(evalResultsFiltered)
+        print("TP/FP/FN : ",tp,fp,fn)
+        precision=getPrecision(tp,fp)
+        recall=getRecall(tp,fn)
+        resultsPR =resultsPR.append(pd.DataFrame({'min_tresh_values' : [min_tresh],
+            'min_IoU' : [min_IoU],
+            'precision' : [precision],
+            'recall' : [recall],
+            'TP' : [tp],
+            'FP' : [fp],
+            'FN' : [fn] }))
+    
+    return resultsPR
 
 
-def test():
-    os.chdir("..")
-    evalResults = pd.read_csv('evaluationData/Evaluation_results.csv')
-    print('Precision: ',getPrecision(evalResults))
-    print('Recall: ',getRecall(evalResults))
+def averagePrecision(resultsPR):
+    totalPrecision=0
+    totalPrecision=resultsPR['precision'].sum()
+    return totalPrecision/len(resultsPR)
 
-test()
+
+def vizualize(resultsPR,average_precision):
+    precision=resultsPR['precision'].values
+    recall=resultsPR['recall'].values
+    # In matplotlib < 1.5, plt.fill_between does not have a 'step' argument
+    step_kwargs = ({'step': 'post'}
+                if 'step' in signature(plt.fill_between).parameters
+                else {})
+    plt.step(recall, precision, color='b', alpha=0.2,
+            where='post')
+    plt.fill_between(recall, precision, alpha=0.2, color='b', **step_kwargs)
+
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+    plt.ylim([0.0, 1.05])
+    plt.xlim([0.0, 1.0])
+    plt.title('2-class Precision-Recall curve: AP={0:0.2f}'.format(
+            average_precision))
+    plt.show()        
+
+
+def evaluate(evalResults):
+    
+    min_IoU=0.5
+    min_tresh_values=[0.2,0.4,0.6,0.8]
+    #evalResults = pd.read_csv('evaluationData/Evaluation_results.csv')
+    ResultsPandR=ListOnTreshold(evalResults,min_IoU,min_tresh_values)
+    ap=averagePrecision(ResultsPandR)
+    print(ResultsPandR)
+    print(ap)
+    vizualize(ResultsPandR,ap)
+
+
+os.chdir("..")
+evalResults = pd.read_csv('evaluationData/Evaluation_results.csv')
+
+evaluate(evalResults)
