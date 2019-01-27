@@ -195,7 +195,7 @@ def EvaluateObjectDetection(image,data,min_tresh_values):
                 break
             if className==trueClass:
                 detected=True
-                print(className+':'+str(normScores[index]))
+                #print(className+':'+str(normScores[index]))
                 bbox=normBBoxes[index]
                 ymin = bbox[0]
                 xmin = bbox[1]
@@ -211,7 +211,7 @@ def EvaluateObjectDetection(image,data,min_tresh_values):
                              'y2' : ymaxx }
             
                 iou=evaluation.get_iou(originalBB, detectedBB) 
-                print(iou)
+                #print(iou)
                 data['DetectedClass']=className
                 data['Detected'] = True
                 data['Confidence'] = normScores[index]
@@ -245,35 +245,44 @@ def EvaluateObjectDetection(image,data,min_tresh_values):
 
 def main():
     completeEvaluationData=pd.DataFrame()
-    evaluationData=pd.DataFrame()
+    
     min_tresh_values=[0.2,0.4,0.6,0.8]
 
-    for className in ['T-Shirt_Regular']:
+    for className in ['T-Shirt_Regular','Coat_Regular','Jacket_Regular','Shirt_LongSleeves','Shirt_Polo','Shirt_Regular','Suit_Regular','T-Shirt_LongSleeves']:
         testDataSet=getEvalData.GetObjectByClass(className)
-
+        evaluationData=pd.DataFrame()
+        print("className : ",className," - evaluating..")
         for selectedPhotoData in testDataSet.iterrows():
             #selectedPhotoData=testDataSet.iloc[photoNumber]
             selectedPhotoData=selectedPhotoData[1]
             imageName=selectedPhotoData['filename']
 
-            print("imageName :",imageName)
+            #print("imageName :",imageName)
             imagePath='evaluationData/'+className
             image = cv2.imread(join(imagePath,imageName))
             #tagged_image = cv2.resize(image,(0,0), fx=0.5, fy=0.5)
             result=EvaluateObjectDetection(image,selectedPhotoData,min_tresh_values)
             evaluationData=evaluationData.append(result)
+            print("imageName : ",imageName," - complete")
+           
 
         evaluationData['Detected'] = evaluationData['Detected'].astype('bool')
         evaluationData.loc_Accuracy = evaluationData.loc_Accuracy.astype(float)   
         evaluationData['loc_Accuracy'].fillna(0, inplace=True)
         evaluationData['Confidence'].fillna(0, inplace=True)
         evaluationData['DetectedClass'].fillna('UnDetected', inplace=True)
-         
-       
-        
-    fileName='evaluationData/Evaluation_results.csv'
-    completeEvaluationData=completeEvaluationData.append(evaluationData)
- 
+        print('')
+        print(className," AP evaluation.#############################################") 
+        print('')
+        evaluation.evaluate(evaluationData)
+        print('')
+        print("######################################################################") 
+        print('')
+        completeEvaluationData=completeEvaluationData.append(evaluationData)
+
+    
+    
+    fileName='evaluationData/Evaluation_results.csv'  
     if os.path.isfile(fileName):
         try:
             os.remove(os.path.join('evaluationData/', 'Evaluation_results.csv'))
@@ -284,8 +293,9 @@ def main():
             print('error:'+fileName+'File replace failed')
     else:
         completeEvaluationData.to_csv(fileName) 
-
-    evaluation.evaluate(evaluationData)   
+    print('')
+    print("Complete AP evaluation.######################################") 
+    evaluation.evaluate(completeEvaluationData)   
     
     # Press any key to close the image
     #cv2.waitKey(0)

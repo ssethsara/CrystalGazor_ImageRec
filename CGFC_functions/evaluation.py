@@ -69,27 +69,33 @@ def getFNCount(evalData):
     return len(evalData)  
 
 def getPrecision(tp,fp):
+    if (tp+fp)==0:
+        return 0
     return tp/(tp+fp)
 
 def getRecall(tp,fn):
+    if (tp+fn)==0:
+        return 0
     return tp/(tp+fn)
 
 def ListOnTreshold(evalResults,min_IoU,min_tresh_values):
-    print(evalResults)
     resultsPR=pd.DataFrame()
     for min_tresh in min_tresh_values:
-        print(min_tresh)
         evalResultsFiltered=evalResults.loc[evalResults['min_tresh']==min_tresh]
+        truePredictions=evalResults.loc[(evalResults['min_tresh']==0.5)&(evalResults['Detected']==True)]
+        truePredictionsCount=len(truePredictions)
+        wholeTestDataCount=len(evalResults)
+        PredictionSuccess=truePredictionsCount/wholeTestDataCount
         tp=getTPCount(evalResultsFiltered,min_IoU)
         fp=getFPCount(evalResultsFiltered)
         fn=getFNCount(evalResultsFiltered)
-        print("TP/FP/FN : ",tp,fp,fn)
         precision=getPrecision(tp,fp)
         recall=getRecall(tp,fn)
         resultsPR =resultsPR.append(pd.DataFrame({'min_tresh_values' : [min_tresh],
             'min_IoU' : [min_IoU],
             'precision' : [precision],
             'recall' : [recall],
+            'TP' : [tp],
             'TP' : [tp],
             'FP' : [fp],
             'FN' : [fn] }))
@@ -131,11 +137,11 @@ def evaluate(evalResults):
     ResultsPandR=ListOnTreshold(evalResults,min_IoU,min_tresh_values)
     ap=averagePrecision(ResultsPandR)
     print(ResultsPandR)
-    print(ap)
-    vizualize(ResultsPandR,ap)
+    print('average Precision : ', ap)
+    #vizualize(ResultsPandR,ap)
 
 
-os.chdir("..")
-evalResults = pd.read_csv('evaluationData/Evaluation_results.csv')
+#os.chdir("..")
+#evalResults = pd.read_csv('evaluationData/Evaluation_results.csv')
 
-evaluate(evalResults)
+#evaluate(evalResults)
