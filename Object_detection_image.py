@@ -372,6 +372,20 @@ ExtractedData.reset_index(inplace = True)
 with pd.option_context('display.max_rows', None, 'display.max_columns', None):
     print(ExtractedData)
 
+fildir='FacebookData/'+userName+'FBData_results.csv'
+
+if os.path.isfile(fildir):
+        try:
+            os.remove(os.path.join(imagePath, 'FBData_results.csv'))
+            # save new pic after this 
+            ExtractedData.to_csv(fildir)
+            print(fileName+' file Replaced')
+        except:
+            print('error: '+fildir+' File replace failed')
+else:
+    ExtractedData.to_csv(fildir)
+    
+
 
 # Press any key to close the image
 cv2.waitKey(0)
