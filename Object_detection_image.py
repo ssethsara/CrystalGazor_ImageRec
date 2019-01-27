@@ -240,9 +240,16 @@ def ClothDetectionAnalyse(image,tagData,gender):
         crop_img=cropDetectedCloths(image,bbox)
         dominet_colors=color_Detector.dominant_color_detector(crop_img,3)
         colors=[]
+        colorMax=dominet_colors[0]
+        print("dominet_colors : ",dominet_colors)
         for color in dominet_colors:
-            colors.append([color[1],color[3]])
-
+            #get Only one value
+            print("sdsd :",color[1],colorMax[1])
+            if(color[1]>colorMax[1]):
+                print("after :",color[1],colorMax[1])
+                colorMax=color
+            
+                
         className=category_index[bestClasses[index]]['name']
         clothType=None
         clothStyle=None
@@ -254,6 +261,7 @@ def ClothDetectionAnalyse(image,tagData,gender):
         else:     
             clothType,clothStyle=className.split("_")
 
+        print("Final color : ",colorMax)
         
         uploadedDate=str(tagData["UploadedDate"])
         photoID=tagData["PhotoID"]
@@ -264,7 +272,7 @@ def ClothDetectionAnalyse(image,tagData,gender):
              'Upper/Lower' : UpperOrLower[index],
              'style' : clothStyle,
              'scores' : bestScores[index],
-             'dominant_colors': [colors],
+             'dominant_colors': [color[3]],
              'UploadedDate':str(tagData["UploadedDate"]),
              'PhotoID':photoID}),ignore_index=True)
              
@@ -284,7 +292,7 @@ def ClothDetectionAnalyse(image,tagData,gender):
             min_score_thresh=min_score_thresh)
 
     # All the results have been drawn on image. Now display the image.
-    cv2.imshow('Object detector', detectedData['image'][0])
+    #cv2.imshow('Object detector', detectedData['image'][0])
 
   
     return crop_image_Data
