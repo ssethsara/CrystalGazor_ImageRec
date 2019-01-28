@@ -82,20 +82,21 @@ def ListOnTreshold(evalResults,min_IoU,min_tresh_values):
     resultsPR=pd.DataFrame()
     for min_tresh in min_tresh_values:
         evalResultsFiltered=evalResults.loc[evalResults['min_tresh']==min_tresh]
-        truePredictions=evalResults.loc[(evalResults['min_tresh']==0.5)&(evalResults['Detected']==True)]
-        truePredictionsCount=len(truePredictions)
-        wholeTestDataCount=len(evalResults)
-        PredictionSuccess=truePredictionsCount/wholeTestDataCount
+        evalResultsFiltered.sort_values('Confidence')
         tp=getTPCount(evalResultsFiltered,min_IoU)
         fp=getFPCount(evalResultsFiltered)
         fn=getFNCount(evalResultsFiltered)
+
+        wholeTestDataCount=len(evalResultsFiltered)
+        PredictionSuccess=tp/wholeTestDataCount
+
         precision=getPrecision(tp,fp)
         recall=getRecall(tp,fn)
         resultsPR =resultsPR.append(pd.DataFrame({'min_tresh_values' : [min_tresh],
             'min_IoU' : [min_IoU],
             'precision' : [precision],
             'recall' : [recall],
-            'TP' : [tp],
+            'SuccessRate' : [PredictionSuccess],
             'TP' : [tp],
             'FP' : [fp],
             'FN' : [fn] }))
@@ -105,8 +106,10 @@ def ListOnTreshold(evalResults,min_IoU,min_tresh_values):
 
 def averagePrecision(resultsPR):
     totalPrecision=0
+    #resultsPR=resultsPR.loc[resultsPR['SuccessRate']>0.5]
     totalPrecision=resultsPR['precision'].sum()
     return totalPrecision/len(resultsPR)
+
 
 
 def vizualize(resultsPR,average_precision):
@@ -136,12 +139,15 @@ def evaluate(evalResults):
     #evalResults = pd.read_csv('evaluationData/Evaluation_results.csv')
     ResultsPandR=ListOnTreshold(evalResults,min_IoU,min_tresh_values)
     ap=averagePrecision(ResultsPandR)
+   
+   
     print(ResultsPandR)
     print('average Precision : ', ap)
+    print('Mean average Precision : ', mAp)
     #vizualize(ResultsPandR,ap)
 
+"""
+os.chdir("..")
+evalResults = pd.read_csv('evaluationData/Evaluation_results.csv')
 
-#os.chdir("..")
-#evalResults = pd.read_csv('evaluationData/Evaluation_results.csv')
-
-#evaluate(evalResults)
+evaluate(evalResults)"""
