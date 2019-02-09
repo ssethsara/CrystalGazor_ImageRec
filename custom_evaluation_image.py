@@ -184,16 +184,28 @@ def EvaluateObjectDetection(image,data,min_tresh_values):
         iou=0.0
         detected=False
         data['DetectedClass'] = 'UnDetected'
-        if normScores[0]>min_score_thresh:
-                data['DetectedClass']=category_index[normClasses[0]]['name']
+        className=category_index[normClasses[0]]['name']
+        checkAttributes=True
+        
+        if(trueClass in category_Dic.Attributes):
+            checkAttributes=True
+        elif(className in category_Dic.Attributes):
+            checkAttributes=False
+        
+        if ((normScores[0]>min_score_thresh) & checkAttributes):
+                data['DetectedClass']=className
                 data['Confidence'] = normScores[0]
+                data['loc_Accuracy']=0
 
         for index,className in enumerate(normClasses):
             className=category_index[className]['name']
             if(normScores[index]<min_score_thresh):
                 data['Detected'] = False
+                data['loc_Accuracy']=0
                 break
-            if className==trueClass:
+            
+            if ((className==trueClass)):
+                
                 detected=True
                 #print(className+':'+str(normScores[index]))
                 bbox=normBBoxes[index]
@@ -248,7 +260,8 @@ def main():
     
     min_tresh_values=[0.2,0.4,0.6,0.8]
 
-    for className in ['T-Shirt_Regular','Coat_Regular','Jacket_Regular','Shirt_LongSleeves','Shirt_Polo','Shirt_Regular','Suit_Regular','T-Shirt_LongSleeves']:
+    for className in ['Coat_Regular','Dress_Casual','Dress_Formal','Dress_Party','High-Heel','Jacket_Regular','Sandal','Shirt_LongSleeves','Shirt_Polo','Shirt_Regular','Shoe','Short_Regular','Skirt_Long','Skirt_Short','Suit_Regular','Tie','Top_Casual','Top_Formal','trouser_Denim','trouser_Regular','trouser_Slim','T-Shirt_LongSleeves','T-Shirt_Regular']:
+    #for className in ['Skirt_Short']:   
         testDataSet=getEvalData.GetObjectByClass(className)
         evaluationData=pd.DataFrame()
         print("className : ",className," - evaluating..")
@@ -264,11 +277,14 @@ def main():
             result=EvaluateObjectDetection(image,selectedPhotoData,min_tresh_values)
             evaluationData=evaluationData.append(result)
             print("imageName : ",imageName," - complete")
-           
 
+        #with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+         #  print (evaluationData)
         evaluationData['Detected'] = evaluationData['Detected'].astype('bool')
-        evaluationData.loc_Accuracy = evaluationData.loc_Accuracy.astype(float)   
+        evaluationData.loc_Accuracy = evaluationData.loc_Accuracy.astype(float)
         evaluationData['loc_Accuracy'].fillna(0, inplace=True)
+        
+        
         evaluationData['Confidence'].fillna(0, inplace=True)
         evaluationData['DetectedClass'].fillna('UnDetected', inplace=True)
         print('')

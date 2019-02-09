@@ -26,7 +26,7 @@ def xml_to_csv(path):
 
 
 def main():
-    for folder in ['T-Shirt_Regular','Coat_Regular','Jacket_Regular','Shirt_LongSleeves','Shirt_Polo','Shirt_Regular','Suit_Regular','T-Shirt_LongSleeves']:
+    for folder in ['Coat_Regular','Dress_Casual','Dress_Formal','Dress_Party','High-Heel','Jacket_Regular','Sandal','Shirt_LongSleeves','Shirt_Polo','Shirt_Regular','Shoe','Short_Regular','Skirt_Long','Skirt_Short','Suit_Regular','Tie','Top_Casual','Top_Formal','trouser_Denim','trouser_Regular','trouser_Slim','T-Shirt_LongSleeves','T-Shirt_Regular']:
         image_path = os.path.join(os.getcwd(), (folder))
         xml_df = xml_to_csv(image_path)
         xml_df.to_csv((folder + '_labels.csv'), index=None)

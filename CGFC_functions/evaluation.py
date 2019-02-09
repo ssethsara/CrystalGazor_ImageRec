@@ -143,7 +143,7 @@ def evaluate(evalResults):
    
     print(ResultsPandR)
     print('average Precision : ', ap)
-    print('Mean average Precision : ', mAp)
+    #print('Mean average Precision : ', mAp)
     #vizualize(ResultsPandR,ap)
 
 """
