@@ -241,12 +241,12 @@ def ClothDetectionAnalyse(image,tagData,gender):
         dominet_colors=color_Detector.dominant_color_detector(crop_img,3)
         colors=[]
         colorMax=dominet_colors[0]
-        print("dominet_colors : ",dominet_colors)
+        #print("dominet_colors : ",dominet_colors)
         for color in dominet_colors:
             #get Only one value
-            print("sdsd :",color[1],colorMax[1])
+          
             if(color[1]>colorMax[1]):
-                print("after :",color[1],colorMax[1])
+    
                 colorMax=color
             
                 
@@ -289,11 +289,11 @@ def ClothDetectionAnalyse(image,tagData,gender):
             category_index,
             use_normalized_coordinates=True,
             line_thickness=1,
-            min_score_thresh=min_score_thresh)
+            min_score_thresh=0.5)
 
     # All the results have been drawn on image. Now display the image.
     #cv2.imshow('Object detector', detectedData['image'][0])
-
+    cv2.imwrite("FacebookData/Detected/Detected-"+str(tagData['PhotoID'])+".jpg", detectedData['image'][0])
   
     return crop_image_Data
 
@@ -372,11 +372,11 @@ ExtractedData.reset_index(inplace = True)
 with pd.option_context('display.max_rows', None, 'display.max_columns', None):
     print(ExtractedData)
 
-fildir='FacebookData/'+userName+'FBData_results.csv'
+fildir='FacebookData/'+userName+'_FBData_results.csv'
 
 if os.path.isfile(fildir):
         try:
-            os.remove(os.path.join(imagePath, 'FBData_results.csv'))
+            os.remove(os.path.join('FacebookData/',userName+'_FBData_results.csv'))
             # save new pic after this 
             ExtractedData.to_csv(fildir)
             print(fileName+' file Replaced')
