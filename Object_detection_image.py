@@ -163,7 +163,7 @@ def ClothDetectionAnalyse(image,tagData,gender):
     scores=detectedData['scores'][0]
     classes=detectedData['classes'][0]
 
-
+    print("###################################################################################")   
     bestResults=[]
     bestBBox=[]
     bestScores=[]
@@ -219,7 +219,7 @@ def ClothDetectionAnalyse(image,tagData,gender):
                 if((isLowerBodyClothAdded==True) & (isUpperBodyClothAdded==True)):
                     break
     className=category_index[normClasses[index]]['name']
-    print(className)                
+                
 
     for index,score in enumerate(normScores):
       
@@ -278,7 +278,7 @@ def ClothDetectionAnalyse(image,tagData,gender):
         
  
      
-
+    print("###################################################################################")   
     # Draw the results of the detection (aka 'visulaize the results')
     vis_util.visualize_boxes_and_labels_on_image_array(
             detectedData['image'][0],
@@ -293,7 +293,7 @@ def ClothDetectionAnalyse(image,tagData,gender):
     # All the results have been drawn on image. Now display the image.
     #cv2.imshow('Object detector', detectedData['image'][0])
     cv2.imwrite("FacebookData/Detected/Detected-"+str(tagData['PhotoID'])+".jpg", detectedData['image'][0])
-  
+   
     return crop_image_Data
 
 

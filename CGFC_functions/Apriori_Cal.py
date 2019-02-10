@@ -111,7 +111,7 @@ def findAssociations(ItemsAttributes,final_result):
   return  AssociationList 
 
 
-
+"""
 def expandValues():
     itemNo = 0
     expandedData = pd.DataFrame()
@@ -129,7 +129,7 @@ def expandValues():
     expandedData.itemNo = expandedData.itemNo.astype(int) 
 
     return expandedData
-
+"""
 
 
 
@@ -151,11 +151,27 @@ def Apriori_Cal_Run(userData):
     result = [filtered_By_Num_of_Items_2, filtered_By_Num_of_Items_3,filtered_By_Num_of_Items_4,filtered_By_Num_of_Items_5]
     
     final_result = pd.concat(result)
-    final_result
-    ItemsAttributes=['Lowerbody_Type_trouser','Lowerbody_Style_Denim']  
-    AssociationList=findAssociations(ItemsAttributes,final_result)  
+    
+    
 
     #print(AssociationList[0][0]['itemset'][0][1])
-    print(AssociationList)
-  
-  
+   
+    print('')
+    print('######################################')
+    print('')
+    HighValue=PruningAlgo(aprioriApplied_Table)
+    with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+        print(HighValue)
+    print('')
+    print('######################################')
+    print('')
+
+    return final_result
+
+
+def CheckAssociationRules(ItemsAttributes,final_result): 
+    AssociationList=findAssociations(ItemsAttributes,final_result)  
+    return AssociationList    
+
+#userData = pd.read_csv('ProcessedData2.csv')
+#Apriori_Cal_Run(userData)

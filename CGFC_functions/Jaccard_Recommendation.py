@@ -184,10 +184,10 @@ def JaccardRecommendationRun(userData):
     pd.options.display.max_colwidth = 100
     #userData = pd.read_csv('Sid_Original.csv')
     #SimilarWords for Cloth Types
-    similarWords=pd.read_csv('similar-words.csv')
+    similarWords=pd.read_csv('CGFC_functions\similar-words.csv')
 
     #Store database
-    store = pd.read_csv('OnlineStore.csv')
+    store = pd.read_csv('CGFC_functions\OnlineStore.csv')
     store = store.replace('\n',',', regex=True)
     store.head()
 
@@ -215,15 +215,16 @@ def JaccardRecommendationRun(userData):
     for cloths in mpc:
         ShopDatasetUpdated=ScoreShopItems(StorerowString,cloths)  
 
-        MaxScoreItems=ShopDatasetUpdated[ShopDatasetUpdated['Score']==ShopDatasetUpdated['Score'].max()]
+        MaxScoreItems=ShopDatasetUpdated.nlargest(5,'Score')
         itemList=list(MaxScoreItems['ItemID'])
-
+       
         RecommendedShopItems=store.iloc[itemList]
-        RecommendedShopItems=RecommendedShopItems.loc[RecommendedShopItems['Color'].str.lower()==mpc[0][1].lower()]
+        #RecommendedShopItems=RecommendedShopItems.loc[RecommendedShopItems['Color'].str.lower()==mpc[0][1].lower()]
+      
+        print(RecommendedShopItems['URL'].iloc[:5].values) 
+        webbrowser.open_new_tab(str(RecommendedShopItems['URL'].iloc[:5].values[0]))
         
-        print(RecommendedShopItems) 
-        webbrowser.open_new_tab(str(RecommendedShopItems['URL'].iloc[0]))
 
         
-userData=pd.read_csv('Sid_Original.csv')
-JaccardRecommendationRun(userData)     
+#userData=pd.read_csv('Sid_Original.csv')
+#JaccardRecommendationRun(userData)     

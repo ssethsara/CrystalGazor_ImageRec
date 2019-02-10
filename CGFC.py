@@ -10,6 +10,9 @@ from FacebookData import FacebookData as fbData
 from CGFC_functions import PhotoPreprocessing as photo_preprocess
 import Object_detection_image as oDI
 from CGFC_functions import CGFCConfig
+from CGFC_functions import DataPreprocessing
+from CGFC_functions import Jaccard_Recommendation
+from CGFC_functions import Apriori_Cal
 
 def analysePhotoCollection(userId):
     ExtractedData=pd.DataFrame()
@@ -60,6 +63,8 @@ def analysePhotoCollection(userId):
     else:
         ExtractedData.to_csv(fildir)
 
+    return ExtractedData    
+
 
 
 def AnalyseOnePhoto(photoNumber,userId):
@@ -89,7 +94,43 @@ def AnalyseOnePhoto(photoNumber,userId):
     print(onePhotoData)
       
       
+def CGFC_Start():
+    #userData=pd.read_csv('FacebookData\Supun Sethsara_FBData_results.csv')
+    min_thresh=0.3
+    userData=analysePhotoCollection(1)
+    data=DataPreprocessing.DataPreprocessing(userData,min_thresh)
+    print('')
+    print('Image classification Results')
+    print('******************************************************************************************')
+    print('')
+    print(data)
+    print('')
+    print('******************************************************************************************')
+    print('')
+    print('')
+    print('Recomondation ')
+    print('******************************************************************************************')
+    print('')
+    Jaccard_Recommendation.JaccardRecommendationRun(data)     
+    print('')
+    print('******************************************************************************************')
+    print('')
+    print('Association Rules ')
+    print('******************************************************************************************')
+    print('')
+    final_result=Apriori_Cal.Apriori_Cal_Run(data)     
+    print('')
+    print('******************************************************************************************')
+    print('')
+    print('Check Associations')
+    print('******************************************************************************************')
+    print('')
+    ItemsAttributes=['Lowerbody_Type_trouser','Lowerbody_Style_Denim'] 
+    AssociationList=Apriori_Cal.CheckAssociationRules(ItemsAttributes,final_result)   
+    for associ in AssociationList:
+        print(associ['itemset'])  
+    print('')
+    print('******************************************************************************************')
+    print('')
 
-
-AnalyseOnePhoto(1,1)
-#analysePhotoCollection(1)
+CGFC_Start()
