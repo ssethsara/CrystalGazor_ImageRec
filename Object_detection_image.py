@@ -37,9 +37,8 @@ sys.path.append("..")
 from utils import label_map_util
 from utils import visualization_utils as vis_util
 from CGFC_functions import colorDetector as color_Detector
-from CGFC_functions import PhotoPreprocessing as photo_preprocess
 from CGFC_functions import category_Dic 
-from FacebookData import FacebookData as fbData
+from CGFC_functions import CGFCConfig
 
 
 
@@ -157,7 +156,7 @@ def colorRecognition(image,bbox):
 
 
 def ClothDetectionAnalyse(image,tagData,gender):
-
+    min_score_thresh=CGFCConfig.min_score_thresh
     detectedData=Detect_Cloths(image)
 
     boxes=detectedData['boxes'][0]
@@ -267,7 +266,7 @@ def ClothDetectionAnalyse(image,tagData,gender):
         photoID=tagData["PhotoID"]
         
         crop_image_Data=crop_image_Data.append(pd.DataFrame(
-            {'image' : imageName,
+            {'image' : tagData['PhotoName'],
              'type' : clothType,
              'Upper/Lower' : UpperOrLower[index],
              'style' : clothStyle,
@@ -298,99 +297,4 @@ def ClothDetectionAnalyse(image,tagData,gender):
     return crop_image_Data
 
 
-#new update
-
-ExtractedData=pd.DataFrame()
-
-photoNumber=12
-min_score_thresh=0.75    
     
-userId=1
-usersData,photoData=fbData.GetPhotoDataById(userId)
-print(len(photoData))
-
-"""
-#test
-
-selectedPhotoData=photoData.iloc[photoNumber]
-print(selectedPhotoData)
-tagData=selectedPhotoData[['PhotoID','Tag_width','Tag_height','Tag_left','Tag_top']]
-userName=usersData['Name'][0]
-gender=usersData['Gender'][0]
-imageName=selectedPhotoData['PhotoName']
-photoID=selectedPhotoData['PhotoID']
-
-print("PhotoID :",photoID)
-print("Username :",userName)
-print("imageName :",imageName)
-   
-imagePath='FacebookData/'+userName+'/photos/'
-image = cv2.imread(join(imagePath,imageName))
-
-
-tagged_image=photo_preprocess.CropTaggedPerson(image,tagData)
-
-
-    #tagged_image = cv2.resize(tagged_image, (0,0), fx=0.5, fy=0.5)
-    #image = cv2.imread(PATH_TO_IMAGE)
-
-onePhotoData=ClothDetectionAnalyse(tagged_image,gender)
-
-    #ExtractedData=ExtractedData.append(onePhotoData)
-#test-----
-"""
-
-
-
-for index, selectedPhotoData in photoData.iterrows():
-    tagData=selectedPhotoData[['PhotoID','PhotoName','UploadedDate','Tag_width','Tag_height','Tag_left','Tag_top']]
-    userName=usersData['Name'][0]
-    gender=usersData['Gender'][0]
-    imageName=selectedPhotoData['PhotoName']
-    photoID=selectedPhotoData['PhotoID']
-
-    print("PhotoID :",photoID)
-    print("Username :",userName)
-    print("imageName :",imageName)
-   
-    imagePath='FacebookData/'+userName+'/photos/'
-    image = cv2.imread(join(imagePath,imageName))
-
-
-    tagged_image=photo_preprocess.CropTaggedPerson(image,tagData)
-
-
-    #tagged_image = cv2.resize(tagged_image, (0,0), fx=0.5, fy=0.5)
-    #image = cv2.imread(PATH_TO_IMAGE)
-
-    onePhotoData=ClothDetectionAnalyse(tagged_image,tagData,gender)
-
-    ExtractedData=ExtractedData.append(onePhotoData)
-   
-
-ExtractedData.reset_index(inplace = True)
-with pd.option_context('display.max_rows', None, 'display.max_columns', None):
-    print(ExtractedData)
-
-fildir='FacebookData/'+userName+'_FBData_results.csv'
-
-if os.path.isfile(fildir):
-        try:
-            os.remove(os.path.join('FacebookData/',userName+'_FBData_results.csv'))
-            # save new pic after this 
-            ExtractedData.to_csv(fildir)
-            print(fileName+' file Replaced')
-        except:
-            print('error: '+fildir+' File replace failed')
-else:
-    ExtractedData.to_csv(fildir)
-    
-
-
-# Press any key to close the image
-cv2.waitKey(0)
-
-# Clean up
-cv2.destroyAllWindows()
-
-
