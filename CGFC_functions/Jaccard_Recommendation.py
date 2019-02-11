@@ -220,11 +220,10 @@ def JaccardRecommendationRun(userData):
        
         RecommendedShopItems=store.iloc[itemList]
         #RecommendedShopItems=RecommendedShopItems.loc[RecommendedShopItems['Color'].str.lower()==mpc[0][1].lower()]
-      
-        print(RecommendedShopItems['URL'].iloc[:5].values) 
+        reccom=RecommendedShopItems['URL'].iloc[:5].values
         webbrowser.open_new_tab(str(RecommendedShopItems['URL'].iloc[:5].values[0]))
         
-
+    return reccom
         
 #userData=pd.read_csv('Sid_Original.csv')
 #JaccardRecommendationRun(userData)     

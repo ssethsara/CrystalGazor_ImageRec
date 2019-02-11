@@ -13,6 +13,9 @@ from CGFC_functions import CGFCConfig
 from CGFC_functions import DataPreprocessing
 from CGFC_functions import Jaccard_Recommendation
 from CGFC_functions import Apriori_Cal
+from CGFC_functions import PhotoRating
+
+from sklearn.externals import joblib
 
 def analysePhotoCollection(userId):
     ExtractedData=pd.DataFrame()
@@ -94,10 +97,26 @@ def AnalyseOnePhoto(photoNumber,userId):
     print(onePhotoData)
       
       
-def CGFC_Start():
-    #userData=pd.read_csv('FacebookData\Supun Sethsara_FBData_results.csv')
+"""def CGFC_Start():
+    print('')
+    print('Rating on Reactions and Comments')
+    print('******************************************************************************************')
+    #df = pd.read_csv("Fb_reaction.csv", encoding='cp1252')
+    userReactions=pd.read_csv('CGFC_functions\FB_reaction.csv')
+    reactRating=PhotoRating.RatingByReactions(userReactions)
+    userComments = pd.read_csv("CGFC_functions\Fb_comments.csv", encoding='utf-8')
+    commentRating=PhotoRating.RatingByComments(userComments)
+    rating=pd.merge(reactRating, commentRating, on="PhotoID")
+    print(rating)  
+    print('') 
+    print('')
+    print('******************************************************************************************')
+    print('')
     min_thresh=0.3
-    userData=analysePhotoCollection(1)
+    #------------saved File ------------
+    userData=pd.read_csv('FacebookData\Supun Sethsara_FBData_results.csv')
+    #-----------Detection----------------    
+    #userData=analysePhotoCollection(1)
     data=DataPreprocessing.DataPreprocessing(userData,min_thresh)
     print('')
     print('Image classification Results')
@@ -111,14 +130,15 @@ def CGFC_Start():
     print('Recomondation ')
     print('******************************************************************************************')
     print('')
-    Jaccard_Recommendation.JaccardRecommendationRun(data)     
+    reccom=Jaccard_Recommendation.JaccardRecommendationRun(data) 
+    print(reccom) 
     print('')
     print('******************************************************************************************')
     print('')
     print('Association Rules ')
     print('******************************************************************************************')
     print('')
-    final_result=Apriori_Cal.Apriori_Cal_Run(data)     
+    final_result,fRcolumns=Apriori_Cal.Apriori_Cal_Run(data)     
     print('')
     print('******************************************************************************************')
     print('')
@@ -133,4 +153,4 @@ def CGFC_Start():
     print('******************************************************************************************')
     print('')
 
-CGFC_Start()
+#CGFC_Start()"""

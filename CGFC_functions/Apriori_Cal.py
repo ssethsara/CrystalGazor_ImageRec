@@ -13,7 +13,7 @@ def CreateDummies(userData):
 
     #Group the Dummies by the Photo ID
     grp_obj_df = dummies.groupby('Photo_ID').sum()
-    return grp_obj_df
+    return grp_obj_df,dummies.columns.values
 
 
    
@@ -21,9 +21,9 @@ def CreateDummies(userData):
 def DataPreprocessing(userData):
       #Remove Unwanted Columns
   #obj_df = userImageData.select_dtypes(include=['object']).copy()
-  if('UploadedDate' in userData.columns.values):
+  if('Updated_Date' in userData.columns.values):
     print('Removed unwanted column')
-    del userData["UploadedDate"]
+    del userData["Updated_Date"]
   if('image' in userData.columns.values):
     print('Removed unwanted column')
     del userData["image"]  
@@ -137,7 +137,7 @@ def Apriori_Cal_Run(userData):
     #userData = pd.read_csv('ProcessedData.csv')
     userData=userData.loc[:, ~userData.columns.str.contains('^Unnamed')]
     userData=DataPreprocessing(userData)
-    grp_obj_df=CreateDummies(userData)  
+    grp_obj_df,dummyColumn=CreateDummies(userData)  
     aprioriApplied_Table=GenerateAprioriTable(grp_obj_df,0.3)
 
     filtered_By_Num_of_Items_1=GetItemSetOnNumbers(1,aprioriApplied_Table)
@@ -155,7 +155,7 @@ def Apriori_Cal_Run(userData):
     
 
     #print(AssociationList[0][0]['itemset'][0][1])
-   
+    """
     print('')
     print('######################################')
     print('')
@@ -165,8 +165,8 @@ def Apriori_Cal_Run(userData):
     print('')
     print('######################################')
     print('')
-
-    return final_result
+    """
+    return final_result,dummyColumn
 
 
 def CheckAssociationRules(ItemsAttributes,final_result): 
