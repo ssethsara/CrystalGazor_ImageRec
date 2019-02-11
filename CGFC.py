@@ -97,7 +97,7 @@ def AnalyseOnePhoto(photoNumber,userId):
     print(onePhotoData)
       
       
-"""def CGFC_Start():
+def CGFC_Start():
     print('')
     print('Rating on Reactions and Comments')
     print('******************************************************************************************')
@@ -153,4 +153,4 @@ def AnalyseOnePhoto(photoNumber,userId):
     print('******************************************************************************************')
     print('')
 
-#CGFC_Start()"""
+CGFC_Start()
