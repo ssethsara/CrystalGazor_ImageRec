@@ -4,7 +4,7 @@ from tkinter import scrolledtext
 from tkinter import ttk
 from tkinter.ttk import *
 from pandastable import Table, TableModel
-
+import cv2
 
 import pandas as pd
 import numpy as np
@@ -26,7 +26,16 @@ PPdata=pd.DataFrame()
 userData=pd.DataFrame()
 
 def settxt2(sentence):
-     txt2.insert(END, sentence)  
+     txt2.insert(END, sentence) 
+
+def DetectOneImage():
+     photo=spinPhotoVar.get()
+     user=spinUserVar.get()
+     settxt2('User :'+ user)
+     settxt2('Photo :'+ photo)
+     cgfc.AnalyseOnePhoto(int(photo),int(user))
+     #cv2.waitKey(0)     
+
 
 def AccessFile():
      global userData   
@@ -225,11 +234,25 @@ lbl2.grid(column=0, row=0)
 #btn = Button(tab1, text="Click Me", )
 btn2 = Button(tab2, text="Detect Cloths",command=DetectCloths)
 btn2.grid(column=0, row=1)
-btn3 = Button(tab2, text="Access Result",command=AccessFile)
-btn3.grid(column=0, row=2)
-
-txt2 = scrolledtext.ScrolledText(tab2,width=95,height=20)
+AccessFilebtn = Button(tab2, text="Access Result",command=AccessFile)
+AccessFilebtn.grid(column=0, row=2)
+txt2 = scrolledtext.ScrolledText(tab2,width=95,height=10)
 txt2.grid(column=1,row=3)
+DetectOneImagebtn2 = Button(tab2, text="Detect one Cloth",command=DetectOneImage)
+DetectOneImagebtn2.grid(column=0, row=4)
+
+spinUserVar=StringVar()
+userNO = Label(tab2, text= 'User NO:')
+userNO.grid(column=0, row=5)
+spinUser = Spinbox(tab2, from_=0, to=1,textvariable = spinUserVar ,width=5)
+spinUser.grid(column=0,row=6)
+spinPhotoVar=StringVar()
+photoNO = Label(tab2, text= 'PhotoID :')
+photoNO.grid(column=0, row=7)
+spinPhoto = Spinbox(tab2, from_=0, to=30,textvariable = spinPhotoVar ,width=5)
+spinPhoto.grid(column=0,row=8)
+
+
 
 
 

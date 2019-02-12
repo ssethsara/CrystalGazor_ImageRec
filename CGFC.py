@@ -95,6 +95,11 @@ def AnalyseOnePhoto(photoNumber,userId):
     onePhotoData=oDI.ClothDetectionAnalyse(tagged_image,tagData,gender)
     
     print(onePhotoData)
+    #cv2.waitKey(0)
+
+    # Clean up
+    #cv2.destroyAllWindows()
+
       
       
 def CGFC_Start():
