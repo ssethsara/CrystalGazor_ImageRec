@@ -213,17 +213,52 @@ def JaccardRecommendationRun(userData):
       
 
     for cloths in mpc:
-        ShopDatasetUpdated=ScoreShopItems(StorerowString,cloths)  
+        print(cloths[0])
+        print(cloths[1])
+    
+    
+        #Narrow by Type and Gender
+        clothType=cloths[0].split('_')
+        #print(clothType) 
+        shopFilterByType=StorerowString.loc[StorerowString['Catagory'].str.lower()==clothType[0].lower()]
+        #print(shopFilterByType) 
+        
+        if(len(shopFilterByType)!=0):
+          if(gender=='male'):
+            maleShopItems=shopFilterByType.loc[shopFilterByType['Gender']=='Men']
+            ShopDatasetUpdated = ScoreShopItems(maleShopItems,cloths) 
+          else:  
+            ShopDatasetUpdated = ScoreShopItems(StorerowString,cloths)
 
-        MaxScoreItems=ShopDatasetUpdated.nlargest(5,'Score')
-        itemList=list(MaxScoreItems['ItemID'])
-       
-        RecommendedShopItems=store.iloc[itemList]
-        #RecommendedShopItems=RecommendedShopItems.loc[RecommendedShopItems['Color'].str.lower()==mpc[0][1].lower()]
-        reccom=RecommendedShopItems['URL'].iloc[:5].values
-        webbrowser.open_new_tab(str(RecommendedShopItems['URL'].iloc[:5].values[0]))
+      
+          MaxScoreItems = ShopDatasetUpdated.nlargest(10,'Score')
+          itemList=list(MaxScoreItems['ItemID'])
+
+          RecommendedShopItems=store.iloc[itemList]
+          #print(RecommendedShopItems)
+          #print(RecommendedShopItems['URL'].iloc[:2].values) 
+          colorMatched=[]
+
+          results=[]
+          for index,row in RecommendedShopItems.iterrows():
+            colors=row
+            colorlist=colors.Color.split(',')
+            
+            for color in colorlist:
+             # print(color.lower()+' = '+cloths[1].lower())
+              if(color.lower()==cloths[1].lower()):
+                colorMatched.append(index)
+            
+          #print(colorMatched)  
+          RecommendedShopItems=store.iloc[colorMatched]  
+          #RecommendedShopItems=RecommendedShopItems.loc[mpc[0][1].lower() in str(RecommendedShopItems['Color'].str.lower()).split(',')]
+          
+          results=results.append(RecommendedShopItems['URL'].iloc[:10].values)
+          webbrowser.open_new_tab(str(RecommendedShopItems['URL'].iloc[0]))
+          print(RecommendedShopItems['URL'].iloc[:10].values) 
+        else:
+          print('No Matching items in Store')
         
-    return reccom
-        
+        return results
 #userData=pd.read_csv('Sid_Original.csv')
 #JaccardRecommendationRun(userData)     

@@ -66,7 +66,7 @@ def analysePhotoCollection(userId):
     else:
         ExtractedData.to_csv(fildir)
 
-    return ExtractedData    
+    return ExtractedData,usersData['Gender'][0]    
 
 
 

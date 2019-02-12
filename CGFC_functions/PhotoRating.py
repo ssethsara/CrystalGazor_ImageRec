@@ -5,7 +5,7 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.classify import SklearnClassifier
 from nltk.stem import PorterStemmer
-from wordcloud import WordCloud,STOPWORDS
+#from wordcloud import WordCloud,STOPWORDS
 #import matplotlib.pyplot as plt
 
 import pandas as pd
@@ -47,6 +47,9 @@ def trainWordIdentifyingModel():
     # Read in data
     data = pd.read_csv("clean_data2.csv", encoding='cp1252')
     texts = data['text'].astype(str)
+    texts.dropna()
+    data=data.fillna(0)
+    data.is_offensive = data.is_offensive.astype(int)
     y = data['is_offensive']
 
     #preprocessing
@@ -80,11 +83,20 @@ def predict(texts):
 def predict_prob(texts):
   return np.apply_along_axis(_get_profane_prob, 1, model.predict_proba(vectorizer.transform(texts)))
 
+def IsNegetiveComment(sentence):
+    sentence=[sentence]
+    isPositive=int(predict(sentence))
+    if isPositive==1:
+        return "Positive Comment"
+    else:
+        return "Negetive Comment"    
+
 
 def RatingByComments(userComments):
     #Number of words
+    userComments
     userComments['word_count'] = userComments['Comment'].apply(lambda x: len(str(x).split(" ")))
-    OnlyComments=userComments[['PhotoId','Comment','word_count']]
+    OnlyComments=userComments[['PhotoID','Comment','word_count']]
     OnlyComments
 
     #Transfer comments into lower case
@@ -108,27 +120,27 @@ def RatingByComments(userComments):
         isPositive=int(predict([comments])[0])
         if isPositive==0:
             CommentScored=CommentScored.append(pd.DataFrame({
-                'PhotoId':OnlyComments['PhotoId'][index],
+                'PhotoID':OnlyComments['PhotoID'][index],
                 'Comment':OnlyComments['Comment'][index],
                 'CommentScore':[0]
             }))
         elif isPositive==1:
             CommentScored=CommentScored.append(pd.DataFrame({
-                'PhotoId':OnlyComments['PhotoId'][index],
+                'PhotoID':OnlyComments['PhotoID'][index],
                 'Comment':OnlyComments['Comment'][index],
                 'CommentScore':[1]
             }))
         
-    PhotoIDs=list(set(CommentScored['PhotoId'].values))
+    PhotoIDs=list(set(CommentScored['PhotoID'].values))
     PhotoIDs
     CommentScoreSum=pd.DataFrame()
-    PhotoIDs=list(set(CommentScored['PhotoId'].values))
+    PhotoIDs=list(set(CommentScored['PhotoID'].values))
     PhotoIDs
     CommentScoreSum=pd.DataFrame()
-    for photoid in PhotoIDs:
-        score=CommentScored['CommentScore'].loc[CommentScored['PhotoId']==photoid]
+    for photoiD in PhotoIDs:
+        score=CommentScored['CommentScore'].loc[CommentScored['PhotoID']==photoiD]
         CommentScoreSum=CommentScoreSum.append(pd.DataFrame({
-                        'PhotoID':[photoid],
+                        'PhotoID':[photoiD],
                         'TotalCommentScore':[score.sum()]
                     }))
         
@@ -157,5 +169,13 @@ Rating=RatingByComments(userComments)
 print(Rating)
 """
 
-vectorizer = joblib.load('CGFC_functions/vectorizer.joblib')
-model = joblib.load('CGFC_functions/model.joblib')
+try:
+    vectorizer = joblib.load('CGFC_functions/vectorizer.joblib')
+except:
+    vectorizer = joblib.load('vectorizer.joblib')
+
+
+try:
+    model = joblib.load('CGFC_functions/model.joblib')
+except:
+   model = joblib.load('model.joblib')

@@ -9,6 +9,7 @@ import cv2
 import pandas as pd
 import numpy as np
 
+from FacebookData import FacebookData as fbData
 from CGFC_functions import CGFCConfig
 from CGFC_functions import DataPreprocessing
 from CGFC_functions import Jaccard_Recommendation
@@ -20,10 +21,11 @@ import CGFC as cgfc
 min_thresh=0.3
 columns=['None','Select']
 ApriotResults=pd.DataFrame()
-
+gender='male'
+userId=1
 
 PPdata=pd.DataFrame()
-userData=pd.DataFrame()
+photoData=pd.DataFrame()
 
 def settxt2(sentence):
      txt2.insert(END, sentence) 
@@ -38,13 +40,16 @@ def DetectOneImage():
 
 
 def AccessFile():
-     global userData   
-     userData=pd.read_csv('FacebookData\Supun Sethsara_FBData_results.csv')       
+     global photoData  
+     global gender 
+     usersData,photoData=fbData.GetPhotoDataById(userId)
+     gender=usersData['Gender'][0]
+     photoData=pd.read_csv('FacebookData\Supun Sethsara_FBData_results.csv')       
      DetectImages()        
 
 def DetectCloths():
-     global userData   
-     userData=cgfc.analysePhotoCollection(1)  
+     global photoData   
+     photoData,gender=cgfc.analysePhotoCollection(1)  
      #DetectImages()     
 
 def DetectImages(): 
@@ -52,8 +57,8 @@ def DetectImages():
     PPdata=pd.DataFrame()
     min_thresh=0.3
     
-    #txt2.insert(END, userData) 
-    PPdata=DataPreprocessing.DataPreprocessing(userData,min_thresh)
+    #txt2.insert(END, photoData) 
+    PPdata=DataPreprocessing.DataPreprocessing(photoData,min_thresh)
     #txt2.insert(END, data) 
 
     
@@ -65,7 +70,7 @@ def DetectImages():
     DDtopWindow = tk.Toplevel()
     DDtopWindowlabel = tk.Label(DDtopWindow, text="Detected Data")
     DDtopWindow.geometry("1024x720")
-    table = DDpt = Table(DDtopWindow, dataframe=userData,showtoolbar=True, showstatusbar=True)
+    table = DDpt = Table(DDtopWindow, dataframe=photoData,showtoolbar=True, showstatusbar=True)
     #DDpt.grid(column=0,row=5)
     #table.grid(column=0,row=5)                                  
     DDpt.show()
@@ -103,17 +108,33 @@ def Jaccard():
     reccom=Jaccard_Recommendation.JaccardRecommendationRun(PPdata) 
     txt3.insert(END, reccom)
   
-
+def CheckComment():
+        CommentResultTxt.delete('1.0', END)
+        sentence=txt.get("1.0",END)
+        result=PhotoRating.IsNegetiveComment(sentence)
+        CommentResultTxt.insert(END, result) 
 
 def GetPhotoRating():
     rating=[]
     rating.clear()
-    txt.delete('1.0', END)
-    userReactions=pd.read_csv('CGFC_functions\FB_reaction.csv')
-    reactRating=PhotoRating.RatingByReactions(userReactions)
-    userComments = pd.read_csv("CGFC_functions\Fb_comments.csv", encoding='utf-8')
+    #photoData=pd.read_csv('CGFC_functions\FB_reaction.csv')
+    photoData=pd.read_csv('FacebookData\CGFC-Photos.csv', encoding='cp1252')
+    reactRating=PhotoRating.RatingByReactions(photoData)
+    #userComments = pd.read_csv("CGFC_functions\Fb_comments.csv", encoding='utf-8')
+    userComments = pd.read_csv("FacebookData\CGFC-Comments.csv", encoding='utf-8')
     commentRating=PhotoRating.RatingByComments(userComments)
-    rating=pd.merge(reactRating, commentRating, on="PhotoID")
+    rating=pd.merge(commentRating,photoData, on="PhotoID",how='right')
+    rating['TotalCommentScore']=rating['TotalCommentScore'].fillna(0)
+    rating['total']=rating['total']+rating['TotalCommentScore']
+
+    rating['total']=(rating['total']-rating['total'].min())/(rating['total'].max()-rating['total'].min())
+        
+ 
+    #rating=pd.merge(reactRating, rating, on="PhotoID",how='right')
+
+
+
+
     #txt.insert(END, rating) \
 
     #topTable -Image Ratings
@@ -179,7 +200,7 @@ def checkAssociations():
         AssoWindow = tk.Toplevel()
         AssoWindowlabel = tk.Label(AssoWindow, text="Associations Data")
         AssoWindow.geometry("1024x720")
-        assoText = scrolledtext.ScrolledText(AssoWindow,width=120,height=50)
+        assoText = scrolledtext.ScrolledText(AssoWindow,width=130,height=50)
         assoText.delete('1.0', END) 
         if len(AssociationList)==0:
                 assoText.insert(END, '....NO Associations......')
@@ -204,24 +225,35 @@ window = Tk()
  
 window.title("Crystal Gazor")
  
-dates = pd.date_range('20160101', periods=6)
-df = pd.DataFrame(np.random.randn(6,4),index=dates,columns=list('ABCD'))
-
 
 
 tab_control = ttk.Notebook(window)
  
 #Tab1
 ############################################# 
+
 tab1 = ttk.Frame(tab_control)
 tab_control.add(tab1, text='Photo Rating')
 lbl1 = Label(tab1, text= 'Photo Rating')
-lbl1.grid(column=0, row=0)
-#btn = Button(tab1, text="Click Me", command=clicked)
+lbl1.grid(column=0, row=0, sticky=W)
+
 btn = Button(tab1, text="Rating",command=GetPhotoRating)
-btn.grid(column=0, row=1)
-txt = scrolledtext.ScrolledText(tab1,width=95,height=20)
-txt.grid(column=1,row=2)
+btn.grid(column=1, row=1 ,sticky=E)
+lbl1Sentence = Label(tab1, text= 'Enter Sentence')
+lbl1Sentence.grid(column=1, row=3,sticky=W)
+txt = scrolledtext.ScrolledText(tab1,width=70,height=10)
+txt.grid(column=1,row=4,sticky=W+E+N+S)
+
+lbl1Result = Label(tab1, text= 'Result')
+lbl1Result.grid(column=1, row=5,sticky=W)
+
+CommentResultTxt = scrolledtext.ScrolledText(tab1,width=80,height=2)
+CommentResultTxt.grid(column=1,row=6)
+checkbtn = Button(tab1, text="Check Sentence",command=CheckComment)
+checkbtn.grid(column=1, row=7,sticky=W+S+N+E,pady=20)
+#btn = Button(tab1, text="Click Me", command=clicked)
+
+
 
 
 
@@ -230,28 +262,35 @@ txt.grid(column=1,row=2)
 tab2 = ttk.Frame(tab_control)
 tab_control.add(tab2, text='Image Processing')
 lbl2 = Label(tab2, text= 'Image Processing')
-lbl2.grid(column=0, row=0)
+lbl2.grid(column=0, row=0,sticky=W)
 #btn = Button(tab1, text="Click Me", )
+
+DetectLable = Label(tab2, text= 'Use Cloth Detection -')
+DetectLable.grid(column=3, row=1,sticky=W)
 btn2 = Button(tab2, text="Detect Cloths",command=DetectCloths)
-btn2.grid(column=0, row=1)
+btn2.grid(column=3, row=1,sticky=E,padx=10, pady=10)
+
+FileLable = Label(tab2, text= 'Use Saved data -')
+FileLable.grid(column=3, row=2,sticky=W)
 AccessFilebtn = Button(tab2, text="Access Result",command=AccessFile)
-AccessFilebtn.grid(column=0, row=2)
-txt2 = scrolledtext.ScrolledText(tab2,width=95,height=10)
-txt2.grid(column=1,row=3)
-DetectOneImagebtn2 = Button(tab2, text="Detect one Cloth",command=DetectOneImage)
-DetectOneImagebtn2.grid(column=0, row=4)
+AccessFilebtn.grid(column=3, row=2,sticky=E,padx=10, pady=10)
+txt2 = scrolledtext.ScrolledText(tab2,width=70,height=5)
+txt2.grid(column=1,row=3,columnspan=3, pady=20)
+
 
 spinUserVar=StringVar()
 userNO = Label(tab2, text= 'User NO:')
-userNO.grid(column=0, row=5)
+userNO.grid(column=1, row=4,sticky=E)
 spinUser = Spinbox(tab2, from_=0, to=1,textvariable = spinUserVar ,width=5)
-spinUser.grid(column=0,row=6)
+spinUser.grid(column=2,row=4,sticky=W)
 spinPhotoVar=StringVar()
 photoNO = Label(tab2, text= 'PhotoID :')
-photoNO.grid(column=0, row=7)
-spinPhoto = Spinbox(tab2, from_=0, to=30,textvariable = spinPhotoVar ,width=5)
-spinPhoto.grid(column=0,row=8)
+photoNO.grid(column=2, row=4,sticky=E)
+spinPhoto = Spinbox(tab2, from_=0, to=80,textvariable = spinPhotoVar ,width=5)
+spinPhoto.grid(column=3,row=4,sticky=W)
 
+DetectOneImagebtn2 = Button(tab2, text="Detect one Cloth",command=DetectOneImage)
+DetectOneImagebtn2.grid(column=2, row=9,sticky=E+W+S+N,padx=20, pady=20)
 
 
 
@@ -265,84 +304,85 @@ spinPhoto.grid(column=0,row=8)
 ################################################# 
 tab3 = ttk.Frame(tab_control)
 tab_control.add(tab3, text='Recommendation')
-lbl3 = Label(tab3, text= 'Jaccard')
-lbl3.grid(column=0, row=0)
+lbl3 = Label(tab3, text= 'Recommendation')
+lbl3.grid(column=0, row=0,sticky=W)
 btn3 = Button(tab3, text="Recommend Cloths", command=Jaccard)
 #btn3 = Button(tab3, text="Click Me",command=Jaccard())
-btn3.grid(column=0, row=1)
-txt3 = scrolledtext.ScrolledText(tab3,width=95,height=20)
-txt3.grid(column=1,row=2)
+btn3.grid(column=1, row=1,sticky=E,pady=10)
+txt3 = scrolledtext.ScrolledText(tab3,width=70,height=10)
+txt3.grid(column=1,row=3,pady=20)
  
  
 #Tab4
 ################################################# 
 tab4 = ttk.Frame(tab_control)
 tab_control.add(tab4, text='Association')
-lbl4 = Label(tab4, text='Apriori')
-lbl4.grid(column=0, row=0)
+lbl4 = Label(tab4, text='Association')
+lbl4.grid(column=0, row=0,sticky=W,padx=20)
 AprioriBtn = Button(tab4, text="Initialize", command=Apriori)
-AprioriBtn.grid(column=0, row=1)
+AprioriBtn.grid(column=4, row=1,sticky=E,pady=40)
 
 
 
 #--Item1 combo
 item1Lable = Label(tab4, text= 'Item-1')
-item1Lable.grid(column=0, row=2)
+item1Lable.grid(column=2, row=2,padx=20)
 item1Combo_val = StringVar()
 item1Combo = ttk.Combobox(tab4,textvariable = item1Combo_val, values=columns)
-item1Combo.grid(column=0, row=3)
+item1Combo.grid(column=2, row=3,padx=20)
 item1Combo.current(1)
 item1Combo.bind("<<ComboboxSelected>>", item1Selected)
 
 #--Item2 combo
 item2Lable = Label(tab4, text= 'Item-2')
-item2Lable.grid(column=1, row=2)
+item2Lable.grid(column=3, row=2,padx=20)
 item2Combo_val = StringVar()
 item2Combo = ttk.Combobox(tab4,textvariable = item2Combo_val, values=columns)
-item2Combo.grid(column=1, row=3)
+item2Combo.grid(column=3, row=3,padx=20)
 item2Combo.current(1)
 item2Combo.bind("<<ComboboxSelected>>", item2Selected)
 
 #--Item3 combo
 item2Lable = Label(tab4, text= 'Item-3')
-item2Lable.grid(column=2, row=2)
+item2Lable.grid(column=4, row=2,padx=20)
 item3Combo_val = StringVar()
 item3Combo = ttk.Combobox(tab4,textvariable = item3Combo_val, values=columns)
-item3Combo.grid(column=2, row=3)
+item3Combo.grid(column=4, row=3,padx=20)
 item3Combo.current(1)
 item3Combo.bind("<<ComboboxSelected>>", item3Selected)
 
 #--Item4 combo
 item2Lable = Label(tab4, text= 'Item-4')
-item2Lable.grid(column=3, row=2)
+item2Lable.grid(column=2, row=8,padx=20)
 item4Combo_val = StringVar()
 item4Combo = ttk.Combobox(tab4,textvariable = item4Combo_val, values=columns)
-item4Combo.grid(column=3, row=3)
+item4Combo.grid(column=2, row=9,padx=20)
 item4Combo.current(1)
 item4Combo.bind("<<ComboboxSelected>>", item4Selected)
 
 #--Item5 combo
 item2Lable = Label(tab4, text= 'Item-5')
-item2Lable.grid(column=4, row=2)
+item2Lable.grid(column=3, row=8,padx=20)
 item5Combo_val = StringVar()
 item5Combo = ttk.Combobox(tab4,textvariable = item5Combo_val, values=columns)
-item5Combo.grid(column=4, row=3)
+item5Combo.grid(column=3, row=9,padx=20)
 item5Combo.current(1)
 item5Combo.bind("<<ComboboxSelected>>", item5Selected)
 
 #--Item6 combo
 item2Lable = Label(tab4, text= 'Item-6')
-item2Lable.grid(column=5, row=2)
+item2Lable.grid(column=4, row=8,padx=20)
 item6Combo_val = StringVar()
 item6Combo = ttk.Combobox(tab4,textvariable = item6Combo_val, values=columns)
-item6Combo.grid(column=5, row=3)
+item6Combo.grid(column=4, row=9,padx=20)
 item6Combo.current(1)
 item6Combo.bind("<<ComboboxSelected>>", item6Selected)
 
 
-
+Empty = Label(tab4, text= ' ')
+Empty.grid(column=3, row=7,sticky=W+E+S+N,pady=20)
 checkAssoBtn = Button(tab4, text="check Associations", command=checkAssociations)
-checkAssoBtn.grid(column=6, row=3)
+checkAssoBtn.grid(column=3, row=10,sticky=W+E+S+N,pady=40)
 
 
 ################################################# 
@@ -369,6 +409,6 @@ window.protocol('WM_DELETE_WINDOW', doSomething)  # root is your root window
 
 
 
-window.geometry("1024x480")
+window.geometry("780x420")
  
 window.mainloop()

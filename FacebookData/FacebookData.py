@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 
 
 def GetPhotoDataById(Userid):
-    usersData = pd.read_csv('FacebookData/CGFC-Users.csv')
-    photoData = pd.read_csv('FacebookData/CGFC-Photos.csv')
+    usersData = pd.read_csv('FacebookData/CGFC-Users.csv',)
+    photoData = pd.read_csv('FacebookData/CGFC-Photos.csv',encoding='cp1252')
 
    
     usersData=usersData.loc[photoData['UserId'] == Userid]

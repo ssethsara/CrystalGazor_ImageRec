@@ -22,7 +22,6 @@ websafe_colors = [(0,0,0),
                   (255,255,0),
                   (0,255,255),
                   (255,0,255),
-                  (128, 128, 128)
                   ] # list of web-save colors  
   
 
@@ -99,6 +98,7 @@ def dominant_color_detector(image,amount):
     image = cv2.resize(image, (0,0), fx=0.1, fy=0.1) 
     h,w,bpp = np.shape(image)
 
+    """
     for py in range(0,h):
         for px in range(0,w):
             input_color = (image[py][px][0],image[py][px][1],image[py][px][2])
@@ -109,7 +109,7 @@ def dominant_color_detector(image,amount):
             image[py][px][0]=nearest_color[0]
             image[py][px][1]=nearest_color[1]
             image[py][px][2]=nearest_color[2]
-    
+    """
     #cv2.imshow('matrix', image)
 
     # reshape the image to be a list of pixels
