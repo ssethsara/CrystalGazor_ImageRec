@@ -41,7 +41,6 @@ from CGFC_functions import category_Dic
 from CGFC_functions import CGFCConfig
 
 
-
 # Name of the directory containing the object detection module we're using
 MODEL_NAME = 'inference_graph'
 
@@ -187,6 +186,7 @@ def ClothDetectionAnalyse(image,tagData,gender):
                     bestBBox.append(normBBoxes[index])
                     bestScores.append(normScores[index])
                     bestClasses.append(normClasses[index])
+                    
                     print("isUpper male:",className)
                     isUpperBodyClothAdded=True;
                 elif((className in category_Dic.LowerBody) & (isLowerBodyClothAdded==False)):
