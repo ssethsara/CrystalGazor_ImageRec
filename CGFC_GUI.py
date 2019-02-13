@@ -105,8 +105,10 @@ def Apriori():
     
 def Jaccard():
     txt3.delete('1.0', END)
-    reccom=Jaccard_Recommendation.JaccardRecommendationRun(PPdata) 
-    txt3.insert(END, reccom)
+    reccom=Jaccard_Recommendation.JaccardRecommendationRun(PPdata,gender) 
+    for rec in reccom:
+        txt3.insert(END, '# '+rec)
+        txt3.insert(END, '\n\n')
   
 def CheckComment():
         CommentResultTxt.delete('1.0', END)

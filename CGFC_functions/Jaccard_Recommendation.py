@@ -126,7 +126,9 @@ def PreProcessStoreDataset(store):
         StorerowString=StorerowString.append(pd.DataFrame({
             'ItemID':index,
             'SearchString':rowString,
-            'Color':[str(row['Color'])]
+            'Color':[str(row['Color'])],
+            'Catagory':[str(row['Category'])],
+            'Gender':[str(row['Men/Women'])]
         }),ignore_index=True)
         #StorerowString  (parameter_list):
     return StorerowString
@@ -178,8 +180,8 @@ def ScoreShopItems(StorerowString,cloths):
     return ShopDatasetUpdated  
 
 
+def JaccardRecommendationRun(userData,gender):
 
-def JaccardRecommendationRun(userData):
 
     pd.options.display.max_colwidth = 100
     #userData = pd.read_csv('Sid_Original.csv')
@@ -187,7 +189,7 @@ def JaccardRecommendationRun(userData):
     similarWords=pd.read_csv('CGFC_functions\similar-words.csv')
 
     #Store database
-    store = pd.read_csv('CGFC_functions\OnlineStore.csv')
+    store = pd.read_csv('CGFC_functions\OnlineStore2.csv')
     store = store.replace('\n',',', regex=True)
     store.head()
 
@@ -210,7 +212,12 @@ def JaccardRecommendationRun(userData):
     mpc=MostPreferedCloths.copy() 
 
     mpcList=ListDownSimilarWords(mpc,similarWords)   
-      
+    #gender='male'  
+    
+    pd.options.mode.chained_assignment = None 
+    #print(StorerowString['Color'])
+     
+    MostRecom=list()
 
     for cloths in mpc:
         print(cloths[0])
@@ -224,13 +231,13 @@ def JaccardRecommendationRun(userData):
         #print(shopFilterByType) 
         
         if(len(shopFilterByType)!=0):
-          if(gender=='male'):
+          if(gender.lower()=='male'):
             maleShopItems=shopFilterByType.loc[shopFilterByType['Gender']=='Men']
             ShopDatasetUpdated = ScoreShopItems(maleShopItems,cloths) 
           else:  
             ShopDatasetUpdated = ScoreShopItems(StorerowString,cloths)
 
-      
+         # if(ShopDatasetUpdated!=0):
           MaxScoreItems = ShopDatasetUpdated.nlargest(10,'Score')
           itemList=list(MaxScoreItems['ItemID'])
 
@@ -238,8 +245,6 @@ def JaccardRecommendationRun(userData):
           #print(RecommendedShopItems)
           #print(RecommendedShopItems['URL'].iloc[:2].values) 
           colorMatched=[]
-
-          results=[]
           for index,row in RecommendedShopItems.iterrows():
             colors=row
             colorlist=colors.Color.split(',')
@@ -251,14 +256,22 @@ def JaccardRecommendationRun(userData):
             
           #print(colorMatched)  
           RecommendedShopItems=store.iloc[colorMatched]  
+         
           #RecommendedShopItems=RecommendedShopItems.loc[mpc[0][1].lower() in str(RecommendedShopItems['Color'].str.lower()).split(',')]
-          
-          results=results.append(RecommendedShopItems['URL'].iloc[:10].values)
-          webbrowser.open_new_tab(str(RecommendedShopItems['URL'].iloc[0]))
-          print(RecommendedShopItems['URL'].iloc[:10].values) 
+          if(len(RecommendedShopItems)!=0):
+            #print("###############",RecommendedShopItems['URL'].iloc[:10].values) 
+            MostRecom.append(str(RecommendedShopItems['URL'].iloc[:10].values[0]))
+            print(RecommendedShopItems['URL'].iloc[:10].values) 
+            webbrowser.open_new_tab(str(RecommendedShopItems['URL'].iloc[0]))
+            #print("*************Result***********",MostRecom)
+          else:
+            MostRecom.append('No Items') 
+            #print("*************Result else***********",MostRecom) 
+         
+
         else:
           print('No Matching items in Store')
-        
-        return results
+    return MostRecom
+
 #userData=pd.read_csv('Sid_Original.csv')
 #JaccardRecommendationRun(userData)     

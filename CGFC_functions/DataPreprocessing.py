@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+import os
+from os.path import join
 
 def DataPreprocessing(userData,min_thresh):
     userData=userData.loc[:, ~userData.columns.str.contains('^Unnamed')]
@@ -35,6 +37,20 @@ def DataPreprocessing(userData,min_thresh):
             "Lowerbody_Color":[lower.iloc[index]['dominant_colors']],
             "Lowerbody_Style":[lower.iloc[index]['style']]
         })) 
+
+    fildir='FacebookData/'+'FB'+'_Processeed.csv'
+
+    if os.path.isfile(fildir):
+            try:
+                os.remove(fildir)
+                # save new pic after this 
+                newData.to_csv(fildir)
+                print(fildir+' file Replaced')
+            except:
+                print('error: '+fildir+' File replace failed')
+    else:
+        newData.to_csv(fildir)
+    
         
         
     return newData

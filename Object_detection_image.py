@@ -121,7 +121,7 @@ def cropDetectedCloths(image,bbox):
     bboxWidth=xmaxx-xminn
     bboxHeight=ymaxx-yminn
     crop_img = image[int(yminn+(bboxHeight*1/10)):int(ymaxx-(bboxHeight*1/10)), int(xminn+(bboxWidth*1/10)):int(xmaxx-(bboxWidth*1/10))]
-    cv2.imshow("cropped", crop_img)
+    #cv2.imshow("cropped", crop_img)
 
     return crop_img
 
