@@ -35,9 +35,9 @@ def CropTaggedPerson(image,tagDf):
 
     #body position
     y1_body=y1_head
-    x1_body=int(x1_head-widthPixel*0.75)
+    x1_body=int(x1_head-widthPixel*0.5)
     y2_body=int(y1_head+((height*Tag_height/100))*7.5)
-    x2_body=int(x1_head+((width*Tag_width/100))*1.75)
+    x2_body=int(x1_head+((width*Tag_width/100))*1.5)
 
     if(x1_body<0):
         x1_body=0

@@ -25,8 +25,8 @@ def analysePhotoCollection(userId):
 
     for index, selectedPhotoData in photoData.iterrows():
         tagData=selectedPhotoData[['PhotoID','PhotoName','UploadedDate','Tag_width','Tag_height','Tag_left','Tag_top']]
-        userName=usersData['Name'][0]
-        gender=usersData['Gender'][0]
+        userName=usersData['Name'].iloc[0]
+        gender=usersData['Gender'].iloc[0]
         imageName=selectedPhotoData['PhotoName']
         photoID=selectedPhotoData['PhotoID']
 
@@ -66,19 +66,21 @@ def analysePhotoCollection(userId):
     else:
         ExtractedData.to_csv(fildir)
 
-    return ExtractedData,usersData['Gender'][0]    
+    return ExtractedData  
 
 
 
 def AnalyseOnePhoto(photoNumber,userId):
 
     usersData,photoData=fbData.GetPhotoDataById(userId)
-
+    print(usersData)
     selectedPhotoData=photoData.iloc[photoNumber]
     print(selectedPhotoData)
     tagData=selectedPhotoData[['PhotoID','PhotoName','UploadedDate','Tag_width','Tag_height','Tag_left','Tag_top']]
-    userName=usersData['Name'][0]
-    gender=usersData['Gender'][0]
+    
+   
+    userName=usersData['Name'].iloc[0]
+    gender=usersData['Gender'].iloc[0]
     imageName=selectedPhotoData['PhotoName']
     photoID=selectedPhotoData['PhotoID']
 

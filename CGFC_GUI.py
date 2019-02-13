@@ -26,6 +26,23 @@ userId=1
 
 PPdata=pd.DataFrame()
 photoData=pd.DataFrame()
+fBphotoData=pd.DataFrame()
+usersData=pd.DataFrame()
+
+def initiate():
+    global fBphotoData
+    global usersData
+    usersData,fBphotoData=fbData.GetPhotoDataById(userId)   
+      
+initiate()
+
+def SetUser():
+     global userId
+     global fBphotoData
+     global usersData
+     userId=int(spinUserIDVar.get())
+     usersData,fBphotoData=fbData.GetPhotoDataById(userId) 
+    
 
 def settxt2(sentence):
      txt2.insert(END, sentence) 
@@ -42,14 +59,14 @@ def DetectOneImage():
 def AccessFile():
      global photoData  
      global gender 
-     usersData,photoData=fbData.GetPhotoDataById(userId)
-     gender=usersData['Gender'][0]
-     photoData=pd.read_csv('FacebookData\Supun Sethsara_FBData_results.csv')       
+     name=usersData['Name'].iloc[0]
+     gender=usersData['Gender'].iloc[0]
+     photoData=pd.read_csv('FacebookData/' +name+'_FBData_results.csv')       
      DetectImages()        
 
 def DetectCloths():
      global photoData   
-     photoData,gender=cgfc.analysePhotoCollection(1)  
+     photoData=cgfc.analysePhotoCollection(userId)  
      #DetectImages()     
 
 def DetectImages(): 
@@ -117,15 +134,16 @@ def CheckComment():
         CommentResultTxt.insert(END, result) 
 
 def GetPhotoRating():
+    print(userId,"&&&&&&&&&&&&&&&&&&")
     rating=[]
     rating.clear()
     #photoData=pd.read_csv('CGFC_functions\FB_reaction.csv')
     photoData=pd.read_csv('FacebookData\CGFC-Photos.csv', encoding='cp1252')
-    reactRating=PhotoRating.RatingByReactions(photoData)
+    reactRating=PhotoRating.RatingByReactions(fBphotoData)
     #userComments = pd.read_csv("CGFC_functions\Fb_comments.csv", encoding='utf-8')
-    userComments = pd.read_csv("FacebookData\CGFC-Comments.csv", encoding='utf-8')
+    userComments = pd.read_csv("FacebookData\CGFC-Comments.csv", encoding='cp1252')
     commentRating=PhotoRating.RatingByComments(userComments)
-    rating=pd.merge(commentRating,photoData, on="PhotoID",how='right')
+    rating=pd.merge(commentRating,fBphotoData, on="PhotoID",how='right')
     rating['TotalCommentScore']=rating['TotalCommentScore'].fillna(0)
     rating['total']=rating['total']+rating['TotalCommentScore']
 
@@ -234,23 +252,35 @@ tab_control = ttk.Notebook(window)
 #Tab1
 ############################################# 
 
+
+
 tab1 = ttk.Frame(tab_control)
 tab_control.add(tab1, text='Photo Rating')
+
+spinUserIDVar=StringVar()
+UserIDLAble = Label(tab1, text= 'Set UserID :')
+UserIDLAble.grid(column=0, row=1,sticky=W)
+spinUserID = Spinbox(tab1, from_=1, to=2,textvariable = spinUserIDVar ,width=5)
+spinUserID.grid(column=1,row=1,sticky=W)
+btnUserID = Button(tab1, text="Set User ID",command=SetUser)
+btnUserID.grid(column=2, row=1 ,sticky=W)
+
+
 lbl1 = Label(tab1, text= 'Photo Rating')
 lbl1.grid(column=0, row=0, sticky=W)
 
 btn = Button(tab1, text="Rating",command=GetPhotoRating)
-btn.grid(column=1, row=1 ,sticky=E)
+btn.grid(column=3, row=1 ,sticky=E)
 lbl1Sentence = Label(tab1, text= 'Enter Sentence')
 lbl1Sentence.grid(column=1, row=3,sticky=W)
 txt = scrolledtext.ScrolledText(tab1,width=70,height=10)
-txt.grid(column=1,row=4,sticky=W+E+N+S)
+txt.grid(column=1,row=4,sticky=W+E+N+S,columnspan=3)
 
 lbl1Result = Label(tab1, text= 'Result')
 lbl1Result.grid(column=1, row=5,sticky=W)
 
 CommentResultTxt = scrolledtext.ScrolledText(tab1,width=80,height=2)
-CommentResultTxt.grid(column=1,row=6)
+CommentResultTxt.grid(column=1,row=6,columnspan=3)
 checkbtn = Button(tab1, text="Check Sentence",command=CheckComment)
 checkbtn.grid(column=1, row=7,sticky=W+S+N+E,pady=20)
 #btn = Button(tab1, text="Click Me", command=clicked)
@@ -283,7 +313,7 @@ txt2.grid(column=1,row=3,columnspan=3, pady=20)
 spinUserVar=StringVar()
 userNO = Label(tab2, text= 'User NO:')
 userNO.grid(column=1, row=4,sticky=E)
-spinUser = Spinbox(tab2, from_=0, to=1,textvariable = spinUserVar ,width=5)
+spinUser = Spinbox(tab2, from_=1, to=2,textvariable = spinUserVar ,width=5)
 spinUser.grid(column=2,row=4,sticky=W)
 spinPhotoVar=StringVar()
 photoNO = Label(tab2, text= 'PhotoID :')

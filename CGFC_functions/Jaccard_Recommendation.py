@@ -11,6 +11,7 @@ import webbrowser
 
 
 def DataPreprocessing(userData):
+   
       #Remove Unwanted Columns
   #obj_df = userImageData.select_dtypes(include=['object']).copy()
   if('UploadedDate' in userData.columns.values):
@@ -31,7 +32,7 @@ def DataPreprocessing(userData):
     
   #Replace Null Values with NaN
   userData=userData.replace(['-'],[np.nan])
-
+  
   #null Remove make it itterative
   for attribute in userData.columns.values:
     userData[attribute].value_counts()
@@ -66,7 +67,9 @@ def CalculateJaccardSimilarity(dummygrp):
  
 def GetSimilaritySummation(sim_df,userData):
     #Sum of the Jaccard Indexes under each Column
-    sum_colum=sim_df[1].sum()
+    print(sim_df,'#################################')
+    sum_colum=sim_df.iloc[1].sum()
+    print(sum_colum,'#################################')
     sum_colum
     sum_colum_totals=[]
     photo_ids=[]
@@ -234,8 +237,9 @@ def JaccardRecommendationRun(userData,gender):
           if(gender.lower()=='male'):
             maleShopItems=shopFilterByType.loc[shopFilterByType['Gender']=='Men']
             ShopDatasetUpdated = ScoreShopItems(maleShopItems,cloths) 
-          else:  
-            ShopDatasetUpdated = ScoreShopItems(StorerowString,cloths)
+          elif(gender.lower()=='female'):  
+            maleShopItems=shopFilterByType.loc[shopFilterByType['Gender']=='Women']
+            ShopDatasetUpdated = ScoreShopItems(maleShopItems,cloths)
 
          # if(ShopDatasetUpdated!=0):
           MaxScoreItems = ShopDatasetUpdated.nlargest(10,'Score')
