@@ -3,6 +3,8 @@ import numpy as np
 import os
 from os.path import join
 
+
+#clean items which are having less threshold value and catagorized under proper table columns
 def DataPreprocessing(userData,min_thresh):
     userData=userData.loc[:, ~userData.columns.str.contains('^Unnamed')]
     #userData.drop(userData.columns[0], axis=1, inplace=True)

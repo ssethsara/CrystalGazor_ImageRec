@@ -41,12 +41,13 @@ def DataPreprocessing(userData):
   userData=userData.replace(['-'],[np.nan])
 
   #null Remove make it itterative
+  
   for attribute in userData.columns.values:
     userData[attribute].value_counts()
     macValueIndex=userData[attribute].value_counts().idxmax()
     userData = userData.fillna({attribute: macValueIndex})
     userData[userData.isnull().any(axis=1)]
-    
+  
   return userData
 
 def addToTable(data):

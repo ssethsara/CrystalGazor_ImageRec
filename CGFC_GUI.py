@@ -1,3 +1,5 @@
+#Interfacce Created using tkinter library
+
 from tkinter import *
 import tkinter as tk
 from tkinter import scrolledtext
@@ -29,6 +31,8 @@ photoData=pd.DataFrame()
 fBphotoData=pd.DataFrame()
 usersData=pd.DataFrame()
 
+
+#Get and store photo data and User data when start 
 def initiate():
     global fBphotoData
     global usersData
@@ -36,6 +40,7 @@ def initiate():
       
 initiate()
 
+#Set user By id
 def SetUser():
      global userId
      global fBphotoData
@@ -43,10 +48,11 @@ def SetUser():
      userId=int(spinUserIDVar.get())
      usersData,fBphotoData=fbData.GetPhotoDataById(userId) 
     
-
+#set text to txt2 element
 def settxt2(sentence):
      txt2.insert(END, sentence) 
 
+#Use to detect one image by photo ID
 def DetectOneImage():
      photo=spinPhotoVar.get()
      user=spinUserVar.get()
@@ -55,7 +61,7 @@ def DetectOneImage():
      cgfc.AnalyseOnePhoto(int(photo),int(user))
      #cv2.waitKey(0)     
 
-
+#Get CSV file Data gathered from cloth detection
 def AccessFile():
      global photoData  
      global gender 
@@ -64,11 +70,13 @@ def AccessFile():
      photoData=pd.read_csv('FacebookData/' +name+'_FBData_results.csv')       
      DetectImages()        
 
+#Use cloth detection
 def DetectCloths():
      global photoData   
      photoData=cgfc.analysePhotoCollection(userId)  
-     #DetectImages()     
+     #DetectImages()      
 
+#Post processing gathered data
 def DetectImages(): 
     global PPdata
     PPdata=pd.DataFrame()
@@ -101,6 +109,8 @@ def DetectImages():
     #table.grid(column=0,row=5)                                  
     PPpt.show()
 
+
+#Use apriori algorithem to find associations
 def Apriori():
     
     final_result,fRcolumns=Apriori_Cal.Apriori_Cal_Run(PPdata)
@@ -119,22 +129,23 @@ def Apriori():
     #print(ApriotResults)
     #print(columns)
 
-    
+#Use Jaccard method to Recommend cloths items    
 def Jaccard():
     txt3.delete('1.0', END)
     reccom=Jaccard_Recommendation.JaccardRecommendationRun(PPdata,gender) 
     for rec in reccom:
         txt3.insert(END, '# '+rec)
         txt3.insert(END, '\n\n')
-  
+
+#Check Sentence is Positive or Negetive  
 def CheckComment():
         CommentResultTxt.delete('1.0', END)
         sentence=txt.get("1.0",END)
         result=PhotoRating.IsNegetiveComment(sentence)
         CommentResultTxt.insert(END, result) 
 
+#Rate Comments
 def GetPhotoRating():
-    print(userId,"&&&&&&&&&&&&&&&&&&")
     rating=[]
     rating.clear()
     #photoData=pd.read_csv('CGFC_functions\FB_reaction.csv')
@@ -172,7 +183,6 @@ def StartClothDetection():
 
 
 def item1Selected(event):
-
      print('item1',item1Combo_val.get())
 def item2Selected(event):
      print('item2',item2Combo_val.get())
@@ -188,7 +198,7 @@ def item6Selected(event):
 
 
 
-
+#Check associations
 def checkAssociations():
         ItemsAttributes=[]
         ItemsAttributes.clear()

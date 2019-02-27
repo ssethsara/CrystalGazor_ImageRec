@@ -5,24 +5,36 @@ import pandas as pd
 import numpy as np
 
 
+#import functions in other python files
 
+#File path - FacebookData/FacebookData.py
 from FacebookData import FacebookData as fbData
+#File path - CGFC_functions/PhotoPreprocessing.py
 from CGFC_functions import PhotoPreprocessing as photo_preprocess
+#File path - Object_detection_image.py
 import Object_detection_image as oDI
+#CGFC_functions/CGFCConfig.py
 from CGFC_functions import CGFCConfig
+#CGFC_functions/DataPreprocessing.py
 from CGFC_functions import DataPreprocessing
+#CGFC_functions/Jaccard_Recommendation.py
 from CGFC_functions import Jaccard_Recommendation
+#CGFC_functions/Apriori_Cal.py
 from CGFC_functions import Apriori_Cal
+#CGFC_functions/PhotoRating.py
 from CGFC_functions import PhotoRating
 
 from sklearn.externals import joblib
 
+
+#Detect cloth in multiple images which are get from FacebookFata.py
 def analysePhotoCollection(userId):
     ExtractedData=pd.DataFrame()
 
     usersData,photoData=fbData.GetPhotoDataById(userId)
     print(len(photoData))
 
+    #Itereate over each photo
     for index, selectedPhotoData in photoData.iterrows():
         tagData=selectedPhotoData[['PhotoID','PhotoName','UploadedDate','Tag_width','Tag_height','Tag_left','Tag_top']]
         userName=usersData['Name'].iloc[0]
@@ -44,6 +56,7 @@ def analysePhotoCollection(userId):
         #tagged_image = cv2.resize(tagged_image, (0,0), fx=0.5, fy=0.5)
         #image = cv2.imread(PATH_TO_IMAGE)
 
+        #Use object_Detection_image.py 
         onePhotoData=oDI.ClothDetectionAnalyse(tagged_image,tagData,gender)
 
         ExtractedData=ExtractedData.append(onePhotoData)
@@ -53,6 +66,7 @@ def analysePhotoCollection(userId):
     with pd.option_context('display.max_rows', None, 'display.max_columns', None):
         print(ExtractedData)
 
+    #save in a CSV file
     fildir='FacebookData/'+userName+'_FBData_results.csv'
 
     if os.path.isfile(fildir):
@@ -69,7 +83,7 @@ def analysePhotoCollection(userId):
     return ExtractedData  
 
 
-
+#Detect cloths in one photo
 def AnalyseOnePhoto(photoNumber,userId):
 
     usersData,photoData=fbData.GetPhotoDataById(userId)
@@ -103,7 +117,7 @@ def AnalyseOnePhoto(photoNumber,userId):
     #cv2.destroyAllWindows()
 
       
-      
+#Test whole programe on       
 def CGFC_Start():
     print('')
     print('Rating on Reactions and Comments')

@@ -4,6 +4,8 @@ import os
 import matplotlib.pyplot as plt
 from sklearn.utils.fixes import signature
 
+
+#Used this to evaluate the cloth detection model
 def get_iou(bb1, bb2):
     """
     Calculate the Intersection over Union (IoU) of two bounding boxes.

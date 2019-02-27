@@ -28,21 +28,18 @@ websafe_colors = [(0,0,0),
 
 
 def centroid_histogram(clt):
-    	# grab the number of different clusters and create a histogram
-	# based on the number of pixels assigned to each cluster
 	numLabels = np.arange(0, len(np.unique(clt.labels_)) + 1)
 	(hist, _) = np.histogram(clt.labels_, bins = numLabels)
  
-	# normalize the histogram, such that it sums to one
+	# histogram normalization
 	hist = hist.astype("float")
 	hist /= hist.sum()
  
-	# return the histogram
 	return hist
 
 
 def plot_colors(hist, centroids):
-    	# initialize the bar chart representing the relative frequency
+    # initialize the bar chart representing the relative frequency
 	# of each of the colors
 	bar = np.zeros((50, 300, 3), dtype = "uint8")
 	startX = 0
@@ -56,7 +53,6 @@ def plot_colors(hist, centroids):
 			color.astype("uint8").tolist(), -1)
 		startX = endX
 	
-	# return the bar chart
 	return bar    
 
 
@@ -70,6 +66,7 @@ def closest_colour(requested_colour):
         min_colours[(rd + gd + bd)] = name
     return min_colours[min(min_colours.keys())]
 
+#Get color name by RGB values
 def get_colour_name(requested_colour):
     try:
         closest_name = actual_name = webcolors.rgb_to_name(requested_colour)
@@ -98,6 +95,7 @@ def dominant_color_detector(image,amount):
     image = cv2.resize(image, (0,0), fx=0.1, fy=0.1) 
     h,w,bpp = np.shape(image)
 
+    #USe this to convert each RGB values to nearest websafe color
     """
     for py in range(0,h):
         for px in range(0,w):

@@ -9,10 +9,10 @@ from fuzzywuzzy import fuzz
 import webbrowser
 
 
-
+#Data Preprocessing
 def DataPreprocessing(userData):
    
-      #Remove Unwanted Columns
+  #Remove Unwanted Columns
   #obj_df = userImageData.select_dtypes(include=['object']).copy()
   if('UploadedDate' in userData.columns.values):
     print('Removed unwanted column')
@@ -34,12 +34,13 @@ def DataPreprocessing(userData):
   userData=userData.replace(['-'],[np.nan])
   
   #null Remove make it itterative
+  """  
   for attribute in userData.columns.values:
     userData[attribute].value_counts()
     macValueIndex=userData[attribute].value_counts().idxmax()
     userData = userData.fillna({attribute: macValueIndex})
     userData[userData.isnull().any(axis=1)]
-    
+  """
   return userData
 
 def CreateDummies(userData):
@@ -95,6 +96,7 @@ def FilterValues(sim_df_with_total):
     filterMax
     return filterMax
 
+#Identify most prefered column-lowerbody
 def getMostPreferedCloths_LowerBody(filterMax):
     lowerBody_df = filterMax.filter(items=['Photo_ID','Lowerbody_Type', 'Lowerbody_Color', 'Lowerbody_Style','Similarity'])
     lowerBody_df=lowerBody_df.drop_duplicates()
@@ -106,7 +108,7 @@ def getMostPreferedCloths_LowerBody(filterMax):
     lowerBodyResult=[lowerBodyPreference,lowerBodyPref_Color]
     return lowerBodyResult
 
-
+#Identify most prefered column-upperbody
 def getMostPreferedCloths_UpperBody(filterMax):
     upperBody_df = filterMax.filter(items=['Photo_ID','Upperbody_Type', 'Upperbody_Color', 'Upperbody_Style','Similarity'])
     upperBody_df=upperBody_df.drop_duplicates()
@@ -119,7 +121,7 @@ def getMostPreferedCloths_UpperBody(filterMax):
     return upperBodyResult
 
     
-
+#Pre process store database
 def PreProcessStoreDataset(store):
     storeColumns=list(store.columns.values)
     StorerowString=pd.DataFrame()
@@ -153,6 +155,7 @@ def ListDownSimilarWords(mpcParam,similarWords):
     cloth=cloth.append(similarClothNames)   
   return mpcParam 
 
+#get similarity score for each word in cloth items and return maximum value
 def getSearchScore(rowString,clothItem):
     #rowString=StorerowString.loc[0]['SearchString']
     #print(rowString)
@@ -167,7 +170,7 @@ def getSearchScore(rowString,clothItem):
     #maxScore=getSearchScore(rowString,mpc)
     #print(maxScore)  
 
-
+#update shop data set with max scores
 def ScoreShopItems(StorerowString,cloths):
     ShopDatasetUpdated=pd.DataFrame()
     for index,item in StorerowString.iterrows():
@@ -246,6 +249,7 @@ def JaccardRecommendationRun(userData,gender):
           itemList=list(MaxScoreItems['ItemID'])
 
           RecommendedShopItems=store.iloc[itemList]
+          RecommendedShopItemsALL=RecommendedShopItems.copy()
           #print(RecommendedShopItems)
           #print(RecommendedShopItems['URL'].iloc[:2].values) 
           colorMatched=[]
@@ -261,6 +265,9 @@ def JaccardRecommendationRun(userData,gender):
           #print(colorMatched)  
           RecommendedShopItems=store.iloc[colorMatched]  
          
+          if(len(RecommendedShopItems)==0):
+                RecommendedShopItems=RecommendedShopItemsALL
+
           #RecommendedShopItems=RecommendedShopItems.loc[mpc[0][1].lower() in str(RecommendedShopItems['Color'].str.lower()).split(',')]
           if(len(RecommendedShopItems)!=0):
             #print("###############",RecommendedShopItems['URL'].iloc[:10].values) 

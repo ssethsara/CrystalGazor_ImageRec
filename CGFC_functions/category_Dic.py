@@ -1,3 +1,5 @@
+#cloth catogories
+
 Attributes = {
 		"Bow",
         "Tie",

@@ -33,9 +33,11 @@ from sklearn import metrics
 # This is needed since the notebook is stored in the object_detection folder.
 sys.path.append("..")
 
-# Import utilites
+# Import utilites(utils folder)
 from utils import label_map_util
 from utils import visualization_utils as vis_util
+
+#CGFC_functions folder
 from CGFC_functions import colorDetector as color_Detector
 from CGFC_functions import category_Dic 
 from CGFC_functions import CGFCConfig
@@ -105,7 +107,7 @@ num_detections = detection_graph.get_tensor_by_name('num_detections:0')
 # i.e. a single-column array, where each item in the column has the pixel RGB value
 
 
-
+# crop coth items
 def cropDetectedCloths(image,bbox):
     #Crop image by bbox
     ymin = bbox[0]
@@ -126,7 +128,7 @@ def cropDetectedCloths(image,bbox):
     return crop_img
 
 
-
+#use to detect cloths in image
 def Detect_Cloths(image):
     # image = cv2.imread(PATH_TO_IMAGE)
     image_expanded = np.expand_dims(image, axis=0)
@@ -148,12 +150,13 @@ def Detect_Cloths(image):
     return output 
   
 
+#call colors dominent color detector function in CGFC_Functions\colorDetector.js
 def colorRecognition(image,bbox):
     #color-Recognition 1
         dominet_colors=color_Detector.dominant_color_detector(crop_img,3)
 
 
-
+#Cloth detection whole process start from here
 def ClothDetectionAnalyse(image,tagData,gender):
     min_score_thresh=CGFCConfig.min_score_thresh
     detectedData=Detect_Cloths(image)
@@ -178,6 +181,7 @@ def ClothDetectionAnalyse(image,tagData,gender):
     for index,className in enumerate(normClasses):
         className=category_index[className]['name']
        #if score>=min_score_thresh:
+       #gender based filter
         if((gender=='Male') & (className not in category_Dic.Female_Cloths)&(className not in category_Dic.Attributes)):
                 
                 if((className in category_Dic.UpperBody) & (isUpperBodyClothAdded==False)):

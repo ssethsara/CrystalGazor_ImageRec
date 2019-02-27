@@ -24,7 +24,7 @@ import pkg_resources
 
 
 
-
+#Rate images by reactions
 def RatingByReactions(userReactions):
 
     userReactions.drop(['UserId'], axis = 1, inplace = True)
@@ -43,6 +43,7 @@ def RatingByReactions(userReactions):
 
     return userReactions
 
+#Use this to train word classification model
 def trainWordIdentifyingModel():
     # Read in data
     data = pd.read_csv("clean_data2.csv", encoding='cp1252')
