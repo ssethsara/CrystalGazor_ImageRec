@@ -1,3 +1,6 @@
+#author: Harindi Halkewela - 145028U
+#https://colab.research.google.com/drive/14fU9yadTRszxvl1LjaE3d0tXn0GIMGe5
+
 import pandas as pd
 import numpy as np
 from scipy.spatial.distance import squareform, pdist
