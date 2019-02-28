@@ -1,3 +1,5 @@
+#author Supun Sethsara - 145083G
+
 # import the necessary packages
 import numpy as np
 import cv2
