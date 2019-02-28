@@ -6,12 +6,12 @@
 
 **to Run GUI**
 
-    -Python CGFC_GUI.py
+    Python CGFC_GUI.py
 
 
 **to Run in CMD--(Remove comment symbol fromg start function call)**
 
-    -Python CGFC.py
+    Python CGFC.py
 
 
 **Important Files**
@@ -53,17 +53,17 @@
 
     -colorDetection (Supun Sethsara(145083G))
 
-        -https://colab.research.google.com/drive/1dkt_x44zFbrghZYf-L8CfEjjbv1KtsQE
+        https://colab.research.google.com/drive/1dkt_x44zFbrghZYf-L8CfEjjbv1KtsQE
 
 
     -Jaccard-Final (Harindi Halkewela(145028U))
 
-        -https://colab.research.google.com/drive/14fU9yadTRszxvl1LjaE3d0tXn0GIMGe5
+        https://colab.research.google.com/drive/14fU9yadTRszxvl1LjaE3d0tXn0GIMGe5
 
 
     -apriori-Final (Harindi Halkewela(145028U))
 
-        -https://colab.research.google.com/drive/1TjqnyCwrlnw3kVoUFe-irVy2F6utcwSB
+        https://colab.research.google.com/drive/1x-7dycgz-kvz0e9-wHN3xUifKeAg9Ex6
 
 
 
@@ -72,5 +72,5 @@
 **referrence**
 
     -Tutorial for Tensorflow:
-        -https://github.com/EdjeElectronics/TensorFlow-Object-Detection-API-Tutorial-Train-Multiple-Objects-Windows-10
+        https://github.com/EdjeElectronics/TensorFlow-Object-Detection-API-Tutorial-Train-Multiple-Objects-Windows-10
 
