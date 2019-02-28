@@ -1,5 +1,8 @@
-######## Image Object Detection Using Tensorflow-trained Classifier #########
-#
+#Author: Supun Sethsara
+
+
+#Based on folowing methods following works
+#https://github.com/EdjeElectronics/TensorFlow-Object-Detection-API-Tutorial-Train-Multiple-Objects-Windows-10
 # Author: Evan Juras
 # Date: 1/15/18
 # Description: 
@@ -13,7 +16,7 @@
 ## and some is copied from Dat Tran's example at
 ## https://github.com/datitran/object_detector_app/blob/master/object_detection_app.py
 
-## but I changed it to make it more understandable to me.
+## but I changed it to make it Suitable for our application
 
 # Import packages
 import os
