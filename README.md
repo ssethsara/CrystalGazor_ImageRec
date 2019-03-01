@@ -66,8 +66,14 @@
         https://colab.research.google.com/drive/1x-7dycgz-kvz0e9-wHN3xUifKeAg9Ex6
 
 
-
-
+    -topic model(Harindi Halkewela(145028U))
+        https://colab.research.google.com/drive/1qUeqvNK0gsI4kvEPNnWVduCNGt3e70I5
+        
+    -topic model2(Harindi Halkewela(145028U))
+        https://colab.research.google.com/drive/14GZV4Mhm7hNJkF-PQLT0ST7RWShSYXPF
+     
+    -Photo Rating based on Comments and Reacts(Sandaru Jathunga(145052L))
+        https://colab.research.google.com/drive/1QqthDWM4zKFMCAI3yLfVRIgPmsStVEMh
 
 **referrence**
 
